@@ -1,0 +1,24 @@
+{
+  "routes": [
+    { "path": "/", "title": "openGym" },
+    { "path": "/home", "title": "Home" },
+    { "path": "/checkin", "title": "Check-in" },
+    { "path": "/plan", "title": "Plan" },
+    { "path": "/plan/r/:id", "title": "Routine" },
+    { "path": "/workout", "title": "Workout" },
+    { "path": "/stats", "title": "Stats" },
+    { "path": "/history", "title": "History" },
+    { "path": "/library", "title": "Exercise library" },
+    { "path": "/muscles", "title": "Muscles" },
+    { "path": "/structural-balance", "title": "Structural balance" },
+    { "path": "/progress-photos", "title": "Progress photos" },
+    { "path": "/measurements", "title": "Measurements" },
+    { "path": "/settings", "title": "Settings" },
+    { "path": "/settings/:page", "title": "Settings page" },
+    { "path": "/coach", "title": "Coach" },
+    { "path": "/coach/intake", "title": "Coach intake" },
+    { "path": "/coach/proposal", "title": "Coach proposal" },
+    { "path": "/coach/setup", "title": "Coach setup" },
+    { "path": "/admin", "title": "Admin" }
+  ]
+}
