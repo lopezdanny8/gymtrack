@@ -3633,7 +3633,7 @@ components:
 
     GymTrackPlan:
       type: object
-      required: [id, schemaVersion, status, reviewRequired, activationAllowed, generatedAt, sourceAssessmentUpdatedAt, template, objective, level, levelStatus, levelPoints, daysPerWeek, days, equipment, sessionMinutes, prescription, routines, schedule, cycle, adaptations, notes]
+      required: [id, schemaVersion, status, reviewRequired, activationAllowed, generatedAt, sourceAssessmentUpdatedAt, template, objective, level, levelStatus, levelPoints, daysPerWeek, days, equipment, sessionMinutes, prescription, duration, routines, schedule, cycle, adaptations, notes]
       properties:
         id: { type: string }
         schemaVersion: { type: integer, const: 1 }
@@ -3658,6 +3658,27 @@ components:
         days: { type: array, minItems: 2, maxItems: 6, items: { type: integer, minimum: 0, maximum: 6 } }
         equipment: { type: array, items: { type: string } }
         sessionMinutes: { type: [integer, 'null'], minimum: 30, maximum: 90 }
+        duration:
+          type: object
+          required: [targetMinutes, estimatedMinutes, adjusted, changes]
+          description: >-
+            Conservative planning estimate including warm-up, work, rest and transitions. When
+            the estimate exceeds the P9 target, accessory sets are reduced first and accessory
+            exercises may be removed, while keeping at least three exercises per routine.
+          properties:
+            targetMinutes: { type: [integer, 'null'], minimum: 30, maximum: 90 }
+            estimatedMinutes: { type: [integer, 'null'], minimum: 1 }
+            adjusted: { type: boolean }
+            changes:
+              type: array
+              items:
+                type: object
+                required: [routineId, routineName, reducedSets, removedExercises]
+                properties:
+                  routineId: { type: string }
+                  routineName: { type: string }
+                  reducedSets: { type: integer, minimum: 0 }
+                  removedExercises: { type: array, items: { type: string } }
         prescription:
           type: object
           required: [setsPerExercise, reps, targetRpeMax, progressionEnabled]

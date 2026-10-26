@@ -138,6 +138,56 @@ function applyPrescription(sources, prescription, reviewRequired, objective) {
   }));
 }
 
+const MIN_DURATION_EXERCISES = 3;
+const WORK_SECONDS_PER_REP = 4;
+const REST_SECONDS = { strength: 120, performance: 90, hypertrophy: 75, recomposition: 75 };
+const TRANSITION_SECONDS = 90;
+const WARMUP_SECONDS = 300;
+
+// A conservative planning estimate, not a promise about stopwatch time: it includes a short
+// warm-up, the work and rest of every set, and setup/transition time for each exercise. The
+// estimate is used only to cut accessory volume when P9 is tight; it never adds work to a plan.
+export function estimateRoutineMinutes(routine, objective) {
+  if (!routine || !Array.isArray(routine.ex)) return null;
+  const rest = REST_SECONDS[objective] || REST_SECONDS.hypertrophy;
+  const seconds = WARMUP_SECONDS + routine.ex.reduce((total, exercise) => {
+    const sets = Math.max(1, Number(exercise.sets) || 1);
+    const reps = Math.max(1, Number(exercise.reps) || 1);
+    return total + sets * reps * WORK_SECONDS_PER_REP + Math.max(0, sets - 1) * rest + TRANSITION_SECONDS;
+  }, 0);
+  return Math.ceil(seconds / 60);
+}
+
+function fitSessionDuration(routines, sessionMinutes, objective) {
+  if (!Number.isInteger(sessionMinutes)) return { routines, estimatedMinutes: null, adjusted: false, changes: [] };
+  const changes = [];
+  const fitted = routines.map(routine => {
+    const next = { ...routine, ex: routine.ex.map(exercise => ({ ...exercise })) };
+    const change = { routineId: next.id, routineName: next.name, reducedSets: 0, removedExercises: [] };
+    while (estimateRoutineMinutes(next, objective) > sessionMinutes) {
+      const reducible = next.ex.findIndex(exercise => (Number(exercise.sets) || 1) > 1);
+      if (reducible < 0) break;
+      // Preserve the main lifts at the front; trim the last accessory sets first.
+      const index = [...next.ex.keys()].reverse().find(i => (Number(next.ex[i].sets) || 1) > 1);
+      next.ex[index].sets -= 1;
+      change.reducedSets += 1;
+    }
+    while (estimateRoutineMinutes(next, objective) > sessionMinutes && next.ex.length > MIN_DURATION_EXERCISES) {
+      const removed = next.ex.pop();
+      change.removedExercises.push(removed.id);
+    }
+    if (change.reducedSets || change.removedExercises.length) changes.push(change);
+    return next;
+  });
+  const estimates = fitted.map(routine => estimateRoutineMinutes(routine, objective));
+  return {
+    routines: fitted,
+    estimatedMinutes: estimates.length ? Math.max(...estimates) : null,
+    adjusted: changes.length > 0,
+    changes,
+  };
+}
+
 function cycleFor(reviewRequired) {
   if (reviewRequired) return {
     status: 'review_required',
@@ -221,7 +271,13 @@ export function generateGymTrackPlan(assessment, { id = `gtp_${Date.now().toStri
   }
   const reviewRequired = assessment.planEntryGate.requiresLimitedIntensity === true;
   const prescription = prescriptionFor(objective, assessment.level, reviewRequired);
-  const routines = applyPrescription(sources, prescription, reviewRequired, objective);
+  const prescribedRoutines = applyPrescription(sources, prescription, reviewRequired, objective);
+  const durationFit = fitSessionDuration(
+    prescribedRoutines,
+    Number.isInteger(assessment.availability?.minutes) ? assessment.availability.minutes : null,
+    objective,
+  );
+  const routines = durationFit.routines;
   const schedule = days.map((day, index) => ({ day, dayName: DAY_NAMES[day], routineId: routines[index].id }));
   const adaptations = adaptationDetails(sources, daysPerWeek);
   return {
@@ -249,6 +305,12 @@ export function generateGymTrackPlan(assessment, { id = `gtp_${Date.now().toStri
         changes: recoveryAdjusted ? ['split-for-48-hour-recovery'] : selected.changes,
       },
       prescription,
+      duration: {
+        targetMinutes: Number.isInteger(assessment.availability?.minutes) ? assessment.availability.minutes : null,
+        estimatedMinutes: durationFit.estimatedMinutes,
+        adjusted: durationFit.adjusted,
+        changes: durationFit.changes,
+      },
       routines,
       schedule,
       adaptations,
@@ -258,6 +320,7 @@ export function generateGymTrackPlan(assessment, { id = `gtp_${Date.now().toStri
         : [
           'Rutina inicial heurística GymTrack v1; ajústala según técnica, recuperación y respuesta individual.',
           'La asignación evita repetir el músculo principal antes de 48 horas.',
+          ...(durationFit.adjusted ? ['Se redujeron series o ejercicios accesorios para respetar la duración disponible de cada sesión.'] : []),
           ...(recoveryAdjusted ? ['Se eligió un split alternativo para respetar los días consecutivos de disponibilidad.'] : []),
         ],
     },

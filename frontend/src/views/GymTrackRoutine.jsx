@@ -299,6 +299,19 @@ export default function GymTrackRoutine() {
         </div>}
       </section>
 
+      {plan.duration && <section className="summary-section" data-gt-duration>
+        <div className="summary-heading"><h2>Duración de la sesión</h2></div>
+        <div className="card gt-duration-card">
+          <p className="small muted">Estimación: {plan.duration.estimatedMinutes || '–'} minutos{Number.isInteger(plan.duration.targetMinutes) ? ` de ${plan.duration.targetMinutes} disponibles` : ''}.</p>
+          {plan.duration.adjusted
+            ? <>
+              <strong>Volumen ajustado para caber en tu tiempo disponible.</strong>
+              <ul className="small muted">{(plan.duration.changes || []).map(change => <li key={change.routineId}>{change.routineName}: {change.reducedSets ? `${change.reducedSets} series menos` : ''}{change.reducedSets && change.removedExercises?.length ? ' y ' : ''}{change.removedExercises?.length ? `${change.removedExercises.length} ejercicios accesorios menos` : ''}.</li>)}</ul>
+            </>
+            : <p className="small muted">El volumen base cabe en la duración que indicaste.</p>}
+        </div>
+      </section>}
+
       <section className="summary-section">
         <div className="summary-heading"><h2>Semana personalizada</h2></div>
         {schedule.map(slot => <article className="card gt-routine-day" key={`${slot.day}-${slot.routine.id}`}>

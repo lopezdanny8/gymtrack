@@ -36,7 +36,7 @@ Orden aprobado:
 
 Cada pantalla debe poder cargar el borrador, validar sus propios campos y guardar sin borrar las secciones anteriores.
 
-P7 de la guía funcional pide meses entrenando, días que la persona entrena actualmente, mejor serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo. El paso web captura estos insumos, P9 conserva por separado los días disponibles, el backend deriva elegibilidad y calcula el nivel v1, y el resumen muestra su desglose. El backend genera y persiste la rutina; la vista previa web también está implementada. Aplicarla a la semana activa sigue pendiente.
+P7 de la guía funcional pide meses entrenando, días que la persona entrena actualmente, mejor serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo. El paso web captura estos insumos, P9 conserva por separado los días disponibles, el backend deriva elegibilidad y calcula el nivel v1, y el resumen muestra su desglose. El backend genera y persiste la rutina; la vista previa Web y Aplicar Plan con confirmación ya están implementados.
 
 ### Fase 2 — Evaluación y nivel
 
@@ -64,7 +64,7 @@ Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados
 - [x] Describir Base, Progresión, Intensificación condicional (+2,5 kg según doble progresión y P10) y Descarga (−40 % de volumen); la descarga no es base del siguiente ciclo.
 - [x] Crear `/gymtrack/routine` solo para Web, enlazada desde el resumen y sin tabs. Muestra semana, prescripción, ciclo, sustituciones, estado `review_required` y errores de disponibilidad; crear/regenerar el plan es explícito y la vista no modifica `S.week`.
 - [x] Aplicar solo mediante acción explícita; conservar rutinas existentes, reprogramar únicamente los días P9 y pedir confirmación ante colisiones; no cambiar modo de rotación y bloquear planes `review_required`.
-- [ ] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9 y ejecutar doble progresión con datos de sesiones registrados.
+- [x] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9; el plan informa la estimación y los recortes aplicados. Ejecutar doble progresión con datos de sesiones registrados queda para Fase 4.
 
 ### Fase 4 — Primera sesión y progresión
 

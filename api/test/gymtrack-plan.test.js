@@ -21,13 +21,13 @@ const validDays = {
 };
 const allEquipment = ['bodyweight', 'dumbbell', 'barbell', 'machines', 'cables', 'bands'];
 
-function assessment(daysPerWeek, days, equipment = allEquipment) {
+function assessment(daysPerWeek, days, equipment = allEquipment, minutes = 60) {
   const result = normalizeAssessmentDraft({
     profile: { birthDate: '1990-02-03', biologicalSex: 'male', heightCm: 180, weightKg: 81 },
     parq: parqNo,
     experience: { months: 18, trainingDaysPerWeek: 3, progressionMode: 'tracks_loads' },
     objective: 'hypertrophy',
-    availability: { daysPerWeek, days, minutes: 60, equipment },
+    availability: { daysPerWeek, days, minutes, equipment },
   });
   assert.equal(result.ok, true);
   return result.assessment;
@@ -55,6 +55,27 @@ test('cada categoría de equipamiento seleccionable permite armar el split Full 
     assert.equal(result.ok, true, `failed for equipment ${equipment.join(',') || 'none'}: ${result.error}`);
     assert.equal(result.plan.routines.length, 3);
   }
+});
+
+test('respeta una sesión de 60 minutos sin recortar el volumen base innecesariamente', () => {
+  const result = generateGymTrackPlan(assessment(3, validDays[3], allEquipment, 60));
+  assert.equal(result.ok, true);
+  assert.equal(result.plan.duration.targetMinutes, 60);
+  assert.equal(result.plan.duration.adjusted, false);
+  assert.ok(result.plan.duration.estimatedMinutes <= 60);
+  assert.deepEqual(result.plan.duration.changes, []);
+});
+
+test('una sesión de 30 minutos reduce primero series accesorias y conserva al menos tres ejercicios', () => {
+  const result = generateGymTrackPlan(assessment(3, validDays[3], allEquipment, 30));
+  assert.equal(result.ok, true);
+  assert.equal(result.plan.duration.targetMinutes, 30);
+  assert.equal(result.plan.duration.adjusted, true);
+  assert.ok(result.plan.duration.estimatedMinutes <= 30);
+  assert.ok(result.plan.duration.changes.every(change => change.reducedSets > 0 || change.removedExercises.length > 0));
+  assert.ok(result.plan.routines.every(routine => routine.ex.length >= 3));
+  assert.ok(result.plan.routines.every(routine => routine.ex[0].sets === 3));
+  assert.match(result.plan.notes.at(-1), /duración disponible/);
 });
 
 test('cambia de split para conservar 48 horas cuando los días elegidos son consecutivos', () => {

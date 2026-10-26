@@ -85,6 +85,9 @@ test('GymTrack plan API valida, genera idempotentemente, requiere regenerar asse
   assert.equal(plan.level, 'intermediate');
   assert.equal(plan.daysPerWeek, 3);
   assert.deepEqual(plan.days, [1, 3, 5]);
+  assert.deepEqual(plan.duration.targetMinutes, 60);
+  assert.ok(plan.duration.estimatedMinutes <= 60);
+  assert.equal(plan.duration.adjusted, false);
   assert.equal(plan.routines.length, 3);
   assert.deepEqual(plan.schedule.map(slot => slot.day), [1, 3, 5]);
   assert.deepEqual(plan.cycle.weeks.map(week => week.phase), ['base', 'progression', 'intensification', 'deload']);

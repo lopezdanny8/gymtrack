@@ -41,6 +41,7 @@ const plan = overrides => ({
     { day: 5, dayName: 'viernes', routineId: 'r3' },
   ],
   adaptations: { swapped: 1, dropped: 0, details: [{ type: 'substituted', routineName: 'Cuerpo completo A', exerciseId: '0025', replacementId: '3948' }] },
+  duration: { targetMinutes: 30, estimatedMinutes: 29, adjusted: true, changes: [{ routineId: 'r1', routineName: 'Cuerpo completo A', reducedSets: 3, removedExercises: [] }] },
   cycle: { status: 'ready', progressionRule: { note: 'Sube carga solo tras dos sesiones en el tope con RPE ≤ 8.' }, weeks },
   notes: ['Rutina inicial GymTrack v1.'],
   ...overrides,
@@ -80,6 +81,7 @@ describe('GymTrackRoutine', () => {
     expect(host.textContent).toContain('Descarga')
     expect(host.textContent).toContain('3 series × 8–12 repeticiones')
     expect(host.textContent).toContain('Ajustes por equipamiento')
+    expect(host.textContent).toContain('Volumen ajustado para caber en tu tiempo disponible')
     expect(host.textContent).toContain('no modifica tu semana activa')
     expect(button('Aplicar Plan')).toBeTruthy()
   })

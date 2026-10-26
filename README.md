@@ -19,7 +19,7 @@ La API y el resumen web también muestran el gate P8 combinado con el cuestionar
 
 El nivel v1 ya se calcula en servidor y se muestra en el resumen web con puntaje, desglose, explicación, 1RM estimado y ratio corporal. Usa las reglas documentadas en [la propuesta de nivel y plan](docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md); si falta una serie válida, muestra Intermedio provisional sin inventar un total.
 
-La rutina personalizada se genera y se revisa en `/gymtrack/routine`, con estructuras para 2–6 días, prescripción y ciclo. Aplicar Plan es una acción explícita de Web: conserva rutinas existentes y días no seleccionados, confirma colisiones antes de reprogramar los días P9, mantiene el modo de rotación y bloquea los borradores `review_required`.
+La rutina personalizada se genera y se revisa en `/gymtrack/routine`, con estructuras para 2–6 días, prescripción y ciclo. El generador ajusta series y ejercicios accesorios para respetar la duración P9 y explica esos cambios. Aplicar Plan es una acción explícita de Web: conserva rutinas existentes y días no seleccionados, confirma colisiones antes de reprogramar los días P9, mantiene el modo de rotación y bloquea los borradores `review_required`.
 
 ## Estructura
 

@@ -20,6 +20,9 @@
 .gt-routine .gt-phase h3{font-size:16px;font-weight:600;margin:0 0 5px}
 .gt-routine .gt-phase p{line-height:1.4;margin:6px 0 0}
 .gt-routine .gt-progression-note{line-height:1.5;margin-top:10px}
+.gt-routine .gt-duration-card{line-height:1.45}
+.gt-routine .gt-duration-card p{margin:0 0 8px}
+.gt-routine .gt-duration-card ul{margin:8px 0 0;padding-inline-start:20px}
 .gt-routine .gt-routine-day-heading{align-items:flex-start;margin-bottom:6px}
 .gt-routine .gt-routine-day-heading h3{font-size:17px;font-weight:600;text-transform:capitalize}
 .gt-routine .gt-routine-day-heading .eyebrow{text-transform:capitalize}

@@ -39,12 +39,13 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 - `frontend/src/lib/starter.js` sigue siendo la fuente de ejercicios reutilizables. Su ajuste por equipo devuelve IDs de los ejercicios sustituidos o eliminados y esos cambios se explican en `/gymtrack/routine`.
 - La vista Web `/gymtrack/routine` está implementada y enlazada desde `/onboarding/summary`; muestra rutina, prescripción, ciclo, adaptaciones y gate/errores. La ruta está limitada a Web, no tiene tabs y solo modifica `S.week` mediante la acción explícita Aplicar Plan; generar/regenerar y aplicar requieren clicks separados.
 - Aplicar Plan agrega las rutinas que faltan, reemplaza solo los días P9 seleccionados, conserva rutinas existentes y días no seleccionados, y no toca `queue`, `rotation` ni `scheduleMode`. Las colisiones se muestran y requieren confirmación; un plan `review_required` o desactualizado no se puede aplicar.
+- El generador estima calentamiento, trabajo, descansos y transiciones por sesión; cuando excede los minutos P9, reduce primero series accesorias y luego ejercicios accesorios, conservando al menos tres ejercicios y explicando los cambios en `plan.duration` y la vista Web.
 
 ## Próximos pasos recomendados
 
 1. **Completado:** `/gymtrack/routine` muestra el preview, ciclo, ajustes por equipo, gate y estado de revisión; creación/regeneración es explícita y la semana activa no se toca.
 2. **Completado:** “Aplicar Plan” con confirmación de colisiones, conservación de rutinas existentes, días no seleccionados y modo de rotación; bloqueo de `review_required`.
-3. Ajustar volumen según minutos disponibles y conectar sesión, registro RPE/doble progresión y reevaluación de nivel cada 8 semanas.
+3. **Siguiente:** conectar la sesión preparada, registro RPE/doble progresión y reevaluación de nivel cada 8 semanas.
 4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 
 ## Diagnóstico local actual
@@ -52,7 +53,8 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 - El Vite de preview ya activo sirve `/gymtrack/routine` y `/manus-routes.json` con HTTP 200; el manifiesto incluye el deep link nuevo.
 - El build de producción Web termina correctamente; conserva los avisos existentes sobre chunks grandes e imports dinámicos también importados estáticamente.
 - Verificación de Aplicar Plan: dominio 4/4, vista GymTrackRoutine 6/6, build Web correcto y suite API completa 664/664; no se modificaron Android, iOS, Apple Watch ni Capacitor.
-- Verificación de esta unidad: vista 6/6, rutas/CTA/manifiesto 2/2 y endpoints de plan/evaluación más OpenAPI 10/10. El test frontend completo más reciente tuvo 446/449 archivos y 5.561/5.569 tests aprobados. Los 8 fallos se concentran en tres suites existentes de swipe; los mismos archivos fallan en un worktree limpio del commit previo `342b305`, por lo que no son regresiones de esta unidad.
+- Verificación de duración P9: generador 6/6, API HTTP 1/1, vista focalizada 10/10, build Web correcto y contrato OpenAPI actualizado con `duration`.
+- Verificación de esta unidad: vista 6/6, rutas/CTA/manifiesto 2/2, dominio Aplicar Plan 4/4, endpoints de plan/evaluación más OpenAPI 10/10, y suite frontend completa 450/450 archivos con 5.573/5.573 tests aprobados. Se conservan avisos de React ya existentes en algunas pruebas, sin fallos.
 - En la fase backend anterior, la suite completa pasó 664/664 y los tests web afectados por el ajuste de starter pasaron 48/48; esos cambios quedaron publicados antes de iniciar esta vista.
 - La instalación reportó alertas de auditoría de dependencias (12 frontend y 1 high en API); no se ejecutó `npm audit fix` ni se cambiaron dependencias.
 

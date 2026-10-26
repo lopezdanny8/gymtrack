@@ -24,7 +24,7 @@
 - [x] `POST /api/gymtrack/plan` bloquea P8 cuando corresponda; `/gymtrack/routine` presenta los motivos del gate y enlaces para corregir PAR-Q o experiencia, sin permitir generar si los requisitos no pasan.
 - [x] La serie de press se almacena en kg × repeticiones; si falta una serie válida con los demás datos completos y la persona es elegible, el backend muestra Intermedio provisional sin fabricar puntos, y recalcula al agregarla.
 - [x] Las respuestas PAR-Q quedan separadas del documento sincronizado y el backend devuelve su resumen de completitud y estado inicial.
-- [x] `POST /api/gymtrack/plan` exige PAR-Q completo; si hay una respuesta positiva crea un borrador `review_required` de baja intensidad, sin progresión y con `activationAllowed: false`. La vista muestra la advertencia profesional; Aplicar Plan aún no está implementado y deberá rechazar ese estado. El gate no es autorización médica.
+- [x] `POST /api/gymtrack/plan` exige PAR-Q completo; si hay una respuesta positiva crea un borrador `review_required` de baja intensidad, sin progresión y con `activationAllowed: false`. La vista muestra la advertencia profesional y Aplicar Plan rechaza ese estado. El gate no es autorización médica.
 - [ ] Antes de lanzamiento público, verificar permiso escrito para el cuestionario oficial PAR-Q+ o sustituir la pantalla actual por un instrumento propio revisado; el flujo actual no incluye el seguimiento oficial de páginas 2–3.
 
 ## Nivel y asignación del plan
@@ -40,7 +40,7 @@
 - [x] Implementar `GET/POST /api/gymtrack/plan`, persistencia privada `gymtrack-plan-{userId}.json`, respuesta idempotente por `assessment.updatedAt` y regeneración explícita con `regenerate: true` si cambió la evaluación.
 - [x] Crear `/gymtrack/routine` solo en Web y enlazarla desde el resumen; muestra semana/split, prescripción, ciclo, adaptaciones, gates y errores de disponibilidad. Crear/regenerar exige una acción explícita; revisar la vista no modifica `S.week`.
 - [x] Aplicar solo mediante acción explícita a `S.week`, reasignando únicamente días P9 y confirmando conflictos; conservar rutinas existentes y modo de rotación. Rechazar la aplicación de planes `review_required`.
-- [x] El plan considera objetivo, nivel, días concretos, equipo disponible y 48 horas antes de repetir músculos principales; conserva en el plan la duración P9 de cada sesión. Ajustar el volumen para respetar esa duración queda pendiente.
+- [x] El plan considera objetivo, nivel, días concretos, equipo disponible y 48 horas antes de repetir músculos principales; estima la duración y ajusta series/ejercicios accesorios para respetar los minutos P9, explicando los cambios.
 - [x] El plan describe cuatro semanas: base, progresión, intensificación condicional (+2,5 kg tras dos sesiones en el tope con RPE ≤ 8) y descarga (−40 % de volumen); la descarga no se usa como base de progresión del ciclo siguiente.
 
 ## Aplicar Plan Web
@@ -57,7 +57,7 @@
 ## Verificación de la vista de rutina
 
 - [x] Pruebas focalizadas: vista GymTrackRoutine 6/6; ruta/CTA/manifiesto Web-only 2/2; endpoints plan/evaluación y OpenAPI 10/10; `vite build`, deep link y manifiesto HTTP correctos.
-- [ ] Incidencia baseline: la última suite frontend completa registró 446/449 archivos aprobados (5.561/5.569 tests). Los 8 fallos están en `Plan.swipe.test.jsx`, `RoutineEdit.swipe.test.jsx` y `Workout.swipe.test.jsx`; los mismos tres archivos fallan al ejecutar el commit previo `342b305` en un worktree limpio, por lo que no se atribuyen a esta vista y quedan como deuda de tests existentes.
+- [x] Suite frontend completa de la unidad Aplicar Plan: 450/450 archivos y 5.573/5.573 tests aprobados. Se conservan los avisos de React ya existentes en algunas pruebas, sin fallos.
 
 ## Primera sesión y progresión
 
