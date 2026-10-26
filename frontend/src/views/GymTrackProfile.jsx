@@ -64,7 +64,7 @@ export default function GymTrackProfile() {
         } })
       })
       setMessage('Datos guardados.')
-      window.setTimeout(() => navigate('/home'), 250)
+      window.setTimeout(() => navigate('/onboarding/parq'), 250)
     } catch (e) {
       setError(e?.status === 401 ? 'Inicia sesión para guardar tu evaluación.' : 'No pudimos guardar los datos. Inténtalo de nuevo.')
     } finally { setSaving(false) }

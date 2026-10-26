@@ -2147,7 +2147,16 @@ const routes = {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
     const body = await readBody(req);
-    const { ok, errors, assessment } = normalizeAssessmentDraft({ ...body, criteria: null });
+    const previous = readAssessment(user.id) || {};
+    const merged = {
+      ...previous,
+      ...body,
+      profile: body.profile ? { ...(previous.profile || {}), ...body.profile } : previous.profile,
+      parq: body.parq ? { ...(previous.parq || {}), ...body.parq } : previous.parq,
+      availability: body.availability ? { ...(previous.availability || {}), ...body.availability } : previous.availability,
+      criteria: null,
+    };
+    const { ok, errors, assessment } = normalizeAssessmentDraft(merged);
     if (!ok) return json(res, 400, { error: 'invalid assessment', code: 'assessment-invalid', fields: errors });
     saveAssessment(user.id, assessment);
     audit(req, 'gymtrack.assessment.save', { user, msg: `v${assessment.version}` });

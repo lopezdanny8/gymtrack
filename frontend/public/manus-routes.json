@@ -3,6 +3,7 @@
     { "path": "/", "title": "GymTrack" },
     { "path": "/home", "title": "Home" },
     { "path": "/onboarding/profile", "title": "GymTrack profile" },
+    { "path": "/onboarding/parq", "title": "GymTrack PAR-Q" },
     { "path": "/checkin", "title": "Check-in" },
     { "path": "/plan", "title": "Plan" },
     { "path": "/plan/r/:id", "title": "Routine" },

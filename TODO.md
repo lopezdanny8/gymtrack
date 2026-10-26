@@ -11,6 +11,8 @@
 ## Onboarding y evaluación inicial
 
 - [x] El perfil físico usa altura en centímetros, peso en kilogramos y exactamente dos opciones de sexo: masculino o femenino.
+- [x] La pantalla web `/onboarding/profile` carga y guarda el perfil físico mediante `GET/PUT /api/gymtrack/assessment`.
+- [x] La pantalla web `/onboarding/parq` muestra las siete preguntas y guarda respuestas parciales sin borrar el perfil.
 - [ ] El usuario puede completar progresivamente perfil físico, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento sin perder los datos escritos si falla la conexión.
 - [x] El backend web dispone de `GET/PUT /api/gymtrack/assessment`, valida los campos imposibles de las secciones recibidas y conserva el borrador en un archivo aislado por usuario.
 - [ ] El sistema puede representar el requisito de seis meses de experiencia y dos días semanales, mostrando una salida clara si no se cumple; el bloqueo definitivo queda pendiente de confirmación del grupo.

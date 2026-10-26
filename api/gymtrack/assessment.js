@@ -52,13 +52,14 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
   const availability = input.availability && typeof input.availability === 'object' ? input.availability : {};
   const profileValidation = Object.keys(profile).length ? validatePhysicalProfile(profile) : { ok: false, errors: {} };
   const parqSummary = summarizeParq(parq);
+  const invalidParq = Object.entries(parq).filter(([id, value]) => PARQ_QUESTIONS.some(question => question.id === id) && typeof value !== 'boolean').map(([id]) => id);
   const days = Array.isArray(availability.days) ? [...new Set(availability.days.filter(day => Number.isInteger(day) && day >= 0 && day <= 6))].sort((a, b) => a - b) : [];
   const daysPerWeek = Number.isInteger(availability.daysPerWeek) ? availability.daysPerWeek : null;
   const sleepHours = Number.isFinite(availability.sleepHours) ? availability.sleepHours : null;
   const minutes = Number.isInteger(availability.minutes) ? availability.minutes : null;
   const errors = {};
   if (Object.keys(profile).length && !profileValidation.ok) errors.profile = profileValidation.errors;
-  if (Object.keys(parq).length && !parqSummary.complete) errors.parq = parqSummary.missing;
+  if (invalidParq.length) errors.parq = invalidParq;
   if (daysPerWeek !== null && (daysPerWeek < 2 || daysPerWeek > 6)) errors.daysPerWeek = 'days-per-week-invalid';
   if (daysPerWeek !== null && days.length && days.length !== daysPerWeek) errors.days = 'days-do-not-match-frequency';
   if (sleepHours !== null && (sleepHours < 0 || sleepHours > 24)) errors.sleepHours = 'sleep-hours-invalid';

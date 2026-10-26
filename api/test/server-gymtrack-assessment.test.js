@@ -89,3 +89,19 @@ test('la evaluación exige sesión y rechaza un perfil físico imposible', async
   assert.equal(body.code, 'assessment-invalid');
   assert.equal(body.fields.profile.heightCm, 'height-invalid');
 });
+
+test('el PAR-Q puede guardarse parcialmente sin borrar el perfil', async t => {
+  const h = await startServer(t);
+  const headers = { Cookie: h.cookie, 'Content-Type': 'application/json' };
+  const profile = { birthDate: '1990-02-03', biologicalSex: 'female', heightCm: 165, weightKg: 62 };
+  const first = await fetch(`${h.api}/api/gymtrack/assessment`, { method: 'PUT', headers, body: JSON.stringify({ profile }) });
+  assert.equal(first.status, 200);
+  const second = await fetch(`${h.api}/api/gymtrack/assessment`, {
+    method: 'PUT', headers, body: JSON.stringify({ parq: { heart_condition: false } })
+  });
+  assert.equal(second.status, 200);
+  const saved = (await second.json()).assessment;
+  assert.deepEqual(saved.profile, { ...profile, bmi: 22.8, bmiCategory: 'normal' });
+  assert.equal(saved.parq.heart_condition, false);
+  assert.equal(saved.parqSummary.complete, false);
+});
