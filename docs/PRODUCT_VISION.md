@@ -22,7 +22,9 @@ Crear cuenta o iniciar sesión
 
 ## Rutina semanal
 
-La propuesta debe considerar objetivo, nivel, días y horarios disponibles, duración de sesión, equipamiento, historial, cargas, repeticiones, RPE y recuperación. El usuario podrá revisar y editar su disponibilidad y equipamiento después del onboarding.
+La propuesta debe considerar objetivo, nivel, días y horarios disponibles, duración de sesión, equipamiento, historial, cargas, repeticiones, RPE y recuperación. El motor busca primero la coincidencia de días y nivel, y después el objetivo más cercano; si no existe una combinación exacta, informa qué cambia y permite ajustar días u objetivo. El usuario no recibe un plan si todavía no cumple el requisito de ingreso de al menos seis meses entrenando con regularidad y dos días por semana, o si no completó el PAR-Q. Una respuesta positiva del PAR-Q permite continuar con intensidad limitada y una recomendación de consultar a un profesional.
+
+La primera asignación prepara cuatro semanas: base, progresión, intensificación y descarga. La semana de descarga reduce el volumen en 40 % y no se usa como base de progresión del ciclo siguiente. La plantilla debe respetar la disponibilidad, el equipamiento y un mínimo de 48 horas antes de repetir el mismo grupo muscular. El usuario podrá revisar y editar su disponibilidad y equipamiento después del onboarding.
 
 ## Ajuste contextual de sesión
 

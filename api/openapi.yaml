@@ -362,8 +362,10 @@ paths:
       operationId: saveGymTrackAssessment
       summary: Save the current user's GymTrack web assessment draft
       description: >-
-        Validates and stores the known onboarding fields. The server calculates BMI and PAR-Q
-        status. Level scoring remains pending until the four 0–2 threshold mappings are confirmed.
+        Validates and stores the onboarding draft. P7 records current training frequency and a
+        recent bench-press set; P9 availability remains separate. The server derives eligibility,
+        estimates 1RM with Epley for 2–10 reps and applies the v1 point bands documented in the
+        product plan. Any client-supplied level or criteria are ignored; the server is authoritative.
       requestBody:
         required: true
         content:
@@ -381,6 +383,63 @@ paths:
                   assessment: { $ref: '#/components/schemas/GymTrackAssessment' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/gymtrack/plan:
+    get:
+      tags: [gymtrack]
+      operationId: getGymTrackPlan
+      summary: Get the current user's saved GymTrack plan
+      description: >-
+        Returns the plan saved for the authenticated user. `stale` is true when the saved assessment
+        has changed since generation. This endpoint does not modify the openGym training document.
+      responses:
+        '200':
+          description: Saved plan or null when one has not been generated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [gymtrack]
+      operationId: generateGymTrackPlan
+      summary: Generate or regenerate the current user's first GymTrack plan
+      description: >-
+        Uses only the saved assessment and server-owned scoring. It does not accept a client-selected
+        level, score, objective, template, or exercise list. The operation is idempotent for the same
+        assessment revision; regeneration of a stale plan must be explicitly requested. The returned
+        plan is stored separately and is not applied to the user's openGym week.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GymTrackPlanRequest' }
+      responses:
+        '200':
+          description: Existing idempotent plan or explicitly regenerated plan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanCreateResponse' }
+        '201':
+          description: Newly generated plan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanCreateResponse' }
+        '400':
+          description: Request body contains unsupported or invalid fields.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409':
+          description: Assessment, P8 gate, level, or regeneration confirmation is not ready.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanError' }
+        '422':
+          description: No usable plan can be built from the selected days and equipment.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GymTrackPlanError' }
 
   /api/register/options:
     post:
@@ -3434,7 +3493,7 @@ components:
       type: object
       description: >-
         Partial web onboarding draft. Sections may be sent progressively; invalid values in a
-        supplied section are rejected. Scoring points are server-owned and are not accepted here.
+        supplied section are rejected. Scoring points and level are server-owned; a valid bench set for Epley uses 2–10 reps.
       properties:
         profile:
           type: object
@@ -3450,6 +3509,17 @@ components:
           type: object
           properties:
             months: { type: number, minimum: 0 }
+            trainingDaysPerWeek:
+              type: integer
+              minimum: 0
+              maximum: 7
+              description: Current days trained per week (P7), distinct from availability.daysPerWeek (P9).
+            benchPressBestSet:
+              type: object
+              required: [weightKg, reps]
+              properties:
+                weightKg: { type: number, exclusiveMinimum: 0 }
+                reps: { type: integer, minimum: 2, maximum: 10, description: Valid Epley estimation range for this product. }
             progressionMode: { type: string, maxLength: 32 }
         objective: { type: string, maxLength: 32 }
         availability:
@@ -3464,18 +3534,224 @@ components:
 
     GymTrackAssessment:
       type: object
-      required: [version, updatedAt, profile, parq, parqSummary, experience, objective, availability, level, levelStatus]
+      required: [version, updatedAt, profile, parq, parqSummary, experience, objective, availability, eligibility, planEntryGate, level, levelStatus, levelPoints, levelMaxPoints, criteria, benchPressEstimate, levelExplanation]
       properties:
         version: { type: integer, const: 1 }
         updatedAt: { type: string, format: date-time }
         profile: { type: object, additionalProperties: true }
         parq: { type: object, additionalProperties: { type: boolean } }
         parqSummary: { type: object, additionalProperties: true }
-        experience: { type: object, additionalProperties: true }
+        experience:
+          type: object
+          additionalProperties: true
+          properties:
+            months: { type: number, minimum: 0 }
+            trainingDaysPerWeek: { type: integer, minimum: 0, maximum: 7 }
+            benchPressBestSet:
+              type: object
+              required: [weightKg, reps]
+              properties:
+                weightKg: { type: number, exclusiveMinimum: 0 }
+                reps: { type: integer, minimum: 2, maximum: 10, description: Valid Epley estimation range for this product. }
+            progressionMode: { type: string, maxLength: 32 }
         objective: { type: string }
         availability: { type: object, additionalProperties: true }
+        eligibility:
+          type: object
+          required: [status, eligible, missing, reasons]
+          properties:
+            status: { type: string, enum: [pending, eligible, ineligible] }
+            eligible: { type: [boolean, 'null'] }
+            missing: { type: array, items: { type: string, enum: [months, trainingDaysPerWeek] } }
+            reasons: { type: array, items: { type: string, enum: [training-duration-under-6-months, training-frequency-under-2-days] } }
+        planEntryGate:
+          type: object
+          required: [status, passed, blockingReasons, requiresLimitedIntensity, consultationRecommended]
+          description: P8 entry requirements only; passed does not mean a plan has been generated. Level scoring is reported separately.
+          properties:
+            status: { type: string, enum: [pending, blocked, passed] }
+            passed: { type: [boolean, 'null'] }
+            blockingReasons:
+              type: array
+              items: { type: string, enum: [eligibility-data-incomplete, training-duration-under-6-months, training-frequency-under-2-days, parq-incomplete] }
+            requiresLimitedIntensity: { type: boolean }
+            consultationRecommended: { type: boolean }
         level: { type: ['string', 'null'], enum: [intermediate, advanced, null] }
-        levelStatus: { type: string, enum: [pending-scoring-thresholds, ready-for-scoring] }
+        levelStatus: { type: string, enum: [pending-inputs, ineligible, provisional, scored] }
+        levelPoints: { type: [integer, 'null'], minimum: 0, maximum: 8 }
+        levelMaxPoints: { type: integer, const: 8 }
+        criteria:
+          type: object
+          required: [experience, frequency, relativeStrength, progression]
+          properties:
+            experience: { type: [integer, 'null'], enum: [0, 1, 2, null] }
+            frequency: { type: [integer, 'null'], enum: [0, 1, 2, null] }
+            relativeStrength: { type: [integer, 'null'], enum: [0, 1, 2, null] }
+            progression: { type: [integer, 'null'], enum: [0, 1, 2, null] }
+        benchPressEstimate:
+          type: object
+          required: [method, estimated1RMKg, bodyweightRatio]
+          properties:
+            method: { type: string, const: epley }
+            estimated1RMKg: { type: [number, 'null'], minimum: 0 }
+            bodyweightRatio: { type: [number, 'null'], minimum: 0 }
+        levelExplanation: { type: string }
+
+    GymTrackPlanRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        regenerate: { type: boolean, default: false, description: Explicitly replace a stale saved plan; this never changes the active openGym week. }
+
+    GymTrackPlanResponse:
+      type: object
+      required: [plan, stale]
+      properties:
+        plan:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/GymTrackPlan'
+        stale: { type: boolean }
+
+    GymTrackPlanCreateResponse:
+      type: object
+      required: [plan, stale, created]
+      properties:
+        plan: { $ref: '#/components/schemas/GymTrackPlan' }
+        stale: { type: boolean, const: false }
+        created: { type: boolean, description: False when an identical saved plan was returned idempotently. }
+
+    GymTrackPlanError:
+      type: object
+      required: [error, code]
+      properties:
+        error: { type: string }
+        code: { type: string, enum: [assessment-missing, plan-entry-blocked, level-not-ready, plan-stale, no-compatible-template, request-invalid] }
+        gate: { $ref: '#/components/schemas/GymTrackAssessment/properties/planEntryGate' }
+        currentPlan: { $ref: '#/components/schemas/GymTrackPlan' }
+        stale: { type: boolean }
+
+    GymTrackPlan:
+      type: object
+      required: [id, schemaVersion, status, reviewRequired, activationAllowed, generatedAt, sourceAssessmentUpdatedAt, template, objective, level, levelStatus, levelPoints, daysPerWeek, days, equipment, sessionMinutes, prescription, routines, schedule, cycle, adaptations, notes]
+      properties:
+        id: { type: string }
+        schemaVersion: { type: integer, const: 1 }
+        status: { type: string, enum: [ready, review_required] }
+        reviewRequired: { type: boolean }
+        activationAllowed: { type: boolean, description: False for a review_required PAR-Q draft. }
+        generatedAt: { type: string, format: date-time }
+        sourceAssessmentUpdatedAt: { type: string, format: date-time }
+        template:
+          type: object
+          required: [id, split, exact, changes]
+          properties:
+            id: { type: string }
+            split: { type: string, enum: [full-body-2, upper-lower-2, full-body, ppl, upper-lower, mixed-5, ppl-2x] }
+            exact: { type: boolean }
+            changes: { type: array, items: { type: string } }
+        objective: { type: string, enum: [strength, hypertrophy, recomposition, performance] }
+        level: { type: string, enum: [intermediate, advanced] }
+        levelStatus: { type: string, enum: [scored, provisional] }
+        levelPoints: { type: [integer, 'null'], minimum: 0, maximum: 8 }
+        daysPerWeek: { type: integer, minimum: 2, maximum: 6 }
+        days: { type: array, minItems: 2, maxItems: 6, items: { type: integer, minimum: 0, maximum: 6 } }
+        equipment: { type: array, items: { type: string } }
+        sessionMinutes: { type: [integer, 'null'], minimum: 30, maximum: 90 }
+        prescription:
+          type: object
+          required: [setsPerExercise, reps, targetRpeMax, progressionEnabled]
+          properties:
+            setsPerExercise:
+              type: object
+              required: [min, max]
+              properties:
+                min: { type: integer, minimum: 1, maximum: 8 }
+                max: { type: integer, minimum: 1, maximum: 8 }
+            reps:
+              type: object
+              required: [min, max]
+              properties:
+                min: { type: integer, minimum: 1, maximum: 30 }
+                max: { type: integer, minimum: 1, maximum: 30 }
+            targetRpeMax: { type: integer, minimum: 1, maximum: 10 }
+            progressionEnabled: { type: boolean }
+        routines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [id, name, emoji, ex]
+            properties:
+              id: { type: string }
+              name: { type: string }
+              emoji: { type: string }
+              ex:
+                type: array
+                minItems: 3
+                items:
+                  type: object
+                  required: [id, sets, reps, weight]
+                  properties:
+                    id: { type: string }
+                    sets: { type: integer, minimum: 1 }
+                    reps: { type: integer, minimum: 1 }
+                    weight: { type: number, minimum: 0 }
+        schedule:
+          type: array
+          items:
+            type: object
+            required: [day, dayName, routineId]
+            properties:
+              day: { type: integer, minimum: 0, maximum: 6 }
+              dayName: { type: string }
+              routineId: { type: string }
+        cycle:
+          type: object
+          required: [status, weeks, progressionRule]
+          properties:
+            status: { type: string, enum: [ready, review_required] }
+            weeks:
+              type: array
+              items:
+                type: object
+                required: [week, phase, volumePercent, note]
+                properties:
+                  week: { type: integer, minimum: 1, maximum: 4 }
+                  phase: { type: string, enum: [base, progression, intensification, deload, review] }
+                  volumePercent: { type: integer, minimum: 0, maximum: 100 }
+                  loadIncrementKg: { type: number, minimum: 0 }
+                  note: { type: string }
+            progressionRule:
+              oneOf:
+                - type: 'null'
+                - type: object
+                  required: [method, topRepRequirement, maxRpe, loadIncrementKg, incrementPhase, whenCriteriaNotMet, note]
+                  properties:
+                    method: { type: string, const: double_progression }
+                    topRepRequirement: { type: string, const: two_consecutive_sessions }
+                    maxRpe: { type: integer, minimum: 1, maximum: 10 }
+                    loadIncrementKg: { type: number, minimum: 0 }
+                    incrementPhase: { type: string, const: intensification }
+                    whenCriteriaNotMet: { type: string, const: hold_load }
+                    note: { type: string }
+        adaptations:
+          type: object
+          required: [swapped, dropped, details]
+          properties:
+            swapped: { type: integer, minimum: 0 }
+            dropped: { type: integer, minimum: 0 }
+            details:
+              type: array
+              items:
+                type: object
+                required: [type, routineName, exerciseId]
+                properties:
+                  type: { type: string, enum: [substituted, removed] }
+                  routineName: { type: string }
+                  exerciseId: { type: string }
+                  replacementId: { type: string }
+        notes: { type: array, items: { type: string } }
 
     OwnerProof:
       type: object

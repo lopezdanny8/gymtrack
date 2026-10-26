@@ -59,20 +59,119 @@ test('la evaluación web se guarda separada y se recupera autenticada', async t 
     body: JSON.stringify({
       profile: { birthDate: '1990-02-03', biologicalSex: 'male', heightCm: 180, weightKg: 81 },
       parq: parqNo,
-      experience: { months: 18, progressionMode: 'tracks_loads' },
+      experience: {
+        months: 18,
+        trainingDaysPerWeek: 2,
+        benchPressBestSet: { weightKg: 52.5, reps: 6 },
+        progressionMode: 'tracks_loads',
+      },
       objective: 'hypertrophy',
       availability: { daysPerWeek: 3, days: [1, 3, 5], startTime: '18:00', minutes: 60, sleepHours: 7, equipment: ['dumbbell'] },
+      criteria: { experience: 2, frequency: 2, relativeStrength: 2, progression: 2 },
     })
   });
   assert.equal(response.status, 200);
   const saved = (await response.json()).assessment;
   assert.equal(saved.profile.bmi, 25);
   assert.equal(saved.parqSummary.initialRecoveryStatus, 'green');
-  assert.equal(saved.level, null);
-  assert.equal(saved.levelStatus, 'pending-scoring-thresholds');
+  assert.equal(saved.level, 'intermediate');
+  assert.equal(saved.levelStatus, 'scored');
+  assert.equal(saved.levelPoints, 2);
+  assert.deepEqual(saved.criteria, { experience: 1, frequency: 0, relativeStrength: 0, progression: 1 });
+  assert.deepEqual(saved.benchPressEstimate, { method: 'epley', estimated1RMKg: 63, bodyweightRatio: 0.778 });
+  assert.deepEqual(saved.experience.benchPressBestSet, { weightKg: 52.5, reps: 6 });
+  assert.equal(saved.experience.trainingDaysPerWeek, 2);
+  assert.equal(saved.availability.daysPerWeek, 3);
+  assert.deepEqual(saved.eligibility, { status: 'eligible', eligible: true, missing: [], reasons: [] });
+  assert.deepEqual(saved.planEntryGate, {
+    status: 'passed', passed: true, blockingReasons: [],
+    requiresLimitedIntensity: false, consultationRecommended: false,
+  });
+
+  const partial = await fetch(`${h.api}/api/gymtrack/assessment`, {
+    method: 'PUT', headers, body: JSON.stringify({ experience: { progressionMode: 'plan_with_rpe' } })
+  });
+  assert.equal(partial.status, 200);
+  const updated = (await partial.json()).assessment;
+  assert.equal(updated.experience.progressionMode, 'plan_with_rpe');
+  assert.equal(updated.experience.trainingDaysPerWeek, 2);
+  assert.deepEqual(updated.experience.benchPressBestSet, { weightKg: 52.5, reps: 6 });
+  assert.equal(updated.levelPoints, 3);
+  assert.equal(updated.criteria.progression, 2);
 
   const after = await fetch(`${h.api}/api/gymtrack/assessment`, { headers });
-  assert.deepEqual((await after.json()).assessment, saved);
+  assert.deepEqual((await after.json()).assessment, updated);
+});
+
+test('un PAR-Q positivo completo pasa el gate con intensidad limitada y recomendación', async t => {
+  const h = await startServer(t);
+  const headers = { Cookie: h.cookie, 'Content-Type': 'application/json' };
+  const response = await fetch(`${h.api}/api/gymtrack/assessment`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      parq: { ...parqNo, chest_pain_activity: true },
+      experience: { months: 18, trainingDaysPerWeek: 3 },
+    })
+  });
+  assert.equal(response.status, 200);
+  const assessment = (await response.json()).assessment;
+  assert.deepEqual(assessment.planEntryGate, {
+    status: 'passed', passed: true, blockingReasons: [],
+    requiresLimitedIntensity: true, consultationRecommended: true,
+  });
+});
+
+test('una persona elegible sin serie de banca recibe nivel provisional sin total inventado', async t => {
+  const h = await startServer(t);
+  const headers = { Cookie: h.cookie, 'Content-Type': 'application/json' };
+  const response = await fetch(`${h.api}/api/gymtrack/assessment`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      profile: { birthDate: '1990-02-03', biologicalSex: 'female', heightCm: 165, weightKg: 60 },
+      experience: { months: 18, trainingDaysPerWeek: 3, progressionMode: 'tracks_loads' },
+    }),
+  });
+  assert.equal(response.status, 200);
+  const assessment = (await response.json()).assessment;
+  assert.equal(assessment.levelStatus, 'provisional');
+  assert.equal(assessment.level, 'intermediate');
+  assert.equal(assessment.levelPoints, null);
+  assert.equal(assessment.levelMaxPoints, 8);
+  assert.equal(assessment.criteria.experience, 1);
+  assert.equal(assessment.criteria.relativeStrength, null);
+  assert.equal(assessment.benchPressEstimate.estimated1RMKg, null);
+});
+
+test('la elegibilidad usa los días entrenados en P7 y no los días disponibles de P9', async t => {
+  const h = await startServer(t);
+  const headers = { Cookie: h.cookie, 'Content-Type': 'application/json' };
+  const response = await fetch(`${h.api}/api/gymtrack/assessment`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      experience: { months: 4, trainingDaysPerWeek: 1 },
+      availability: { daysPerWeek: 4, days: [1, 2, 3, 4] },
+    })
+  });
+  assert.equal(response.status, 200);
+  const assessment = (await response.json()).assessment;
+  assert.deepEqual(assessment.eligibility, {
+    status: 'ineligible',
+    eligible: false,
+    missing: [],
+    reasons: ['training-duration-under-6-months', 'training-frequency-under-2-days'],
+  });
+  assert.deepEqual(assessment.planEntryGate, {
+    status: 'blocked',
+    passed: false,
+    blockingReasons: ['training-duration-under-6-months', 'training-frequency-under-2-days', 'parq-incomplete'],
+    requiresLimitedIntensity: false,
+    consultationRecommended: false,
+  });
+  assert.equal(assessment.availability.daysPerWeek, 4);
+  assert.equal(assessment.experience.trainingDaysPerWeek, 1);
 });
 
 test('la evaluación exige sesión y rechaza un perfil físico imposible', async t => {

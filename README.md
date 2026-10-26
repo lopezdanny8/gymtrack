@@ -13,7 +13,13 @@ La aplicación web existente ya incluye planificación de rutinas, registro de s
 - Validación de perfil físico, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento.
 - Borrador aislado por usuario y resumen de completitud.
 
-La asignación definitiva de nivel y las reglas completas del plan inicial todavía están en definición.
+El paso P7 ahora captura meses entrenando, frecuencia real semanal, serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo v7. El backend deriva la elegibilidad con esa frecuencia actual, separada de los días disponibles de P9.
+
+La API y el resumen web también muestran el gate P8 combinado con el cuestionario de actividad (`pending`, `blocked` o `passed`). Una respuesta positiva permite generar después un borrador de baja intensidad que requiere revisión profesional antes de activarse; el gate no es autorización médica. La rutina aún no se genera.
+
+El nivel v1 ya se calcula en servidor y se muestra en el resumen web con puntaje, desglose, explicación, 1RM estimado y ratio corporal. Usa las reglas documentadas en [la propuesta de nivel y plan](docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md); si falta una serie válida, muestra Intermedio provisional sin inventar un total.
+
+La rutina personalizada aún no se genera. La propuesta fija estructuras para 2–6 días y las reglas del ciclo; falta construir el catálogo usando ejercicios del proyecto y conectar la selección/persistencia al backend.
 
 ## Estructura
 

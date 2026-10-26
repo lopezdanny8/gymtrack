@@ -36,7 +36,8 @@ import { effectiveRoutineId } from './queue.js';
 import { stampPut } from './sync-stamps.js';
 import { atomicWrite as durableWrite } from './durable.js';
 import { normalizeAssessmentDraft } from './gymtrack/assessment.js';
-import { readAssessment, saveAssessment } from './gymtrack/store.js';
+import { generateGymTrackPlan } from './gymtrack/plan.js';
+import { readAssessment, saveAssessment, readPlan, savePlan } from './gymtrack/store.js';
 import { excusedOn, nudgeFor, nudgeWindowOpen, toneOf } from './nudge.js';
 
 const PORT = +(process.env.PORT || 3000);
@@ -2135,13 +2136,16 @@ const routes = {
   },
 
   // GymTrack's web onboarding is stored separately from openGym's synced workout document.
-  // This keeps assessment fields out of the existing admin/state routes and leaves older
-  // openGym clients untouched. Scoring thresholds are deliberately not guessed here: the
-  // draft reports that it is pending until the four 0–2 mappings are confirmed.
+  // This keeps assessment and generated plan fields out of the existing admin/state routes and
+  // leaves older openGym clients untouched. Eligibility uses actual P7 frequency, while the plan
+  // uses P9 days/equipment and only server-derived level and objective.
   'GET /api/gymtrack/assessment': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    json(res, 200, { assessment: readAssessment(user.id) });
+    const stored = readAssessment(user.id);
+    if (!stored) return json(res, 200, { assessment: null });
+    const { assessment } = normalizeAssessmentDraft(stored, stored.updatedAt || new Date().toISOString());
+    json(res, 200, { assessment });
   },
   'PUT /api/gymtrack/assessment': async (req, res) => {
     const user = readSession(req);
@@ -2153,6 +2157,7 @@ const routes = {
       ...body,
       profile: body.profile ? { ...(previous.profile || {}), ...body.profile } : previous.profile,
       parq: body.parq ? { ...(previous.parq || {}), ...body.parq } : previous.parq,
+      experience: body.experience ? { ...(previous.experience || {}), ...body.experience } : previous.experience,
       availability: body.availability ? { ...(previous.availability || {}), ...body.availability } : previous.availability,
       criteria: null,
     };
@@ -2161,6 +2166,49 @@ const routes = {
     saveAssessment(user.id, assessment);
     audit(req, 'gymtrack.assessment.save', { user, msg: `v${assessment.version}` });
     json(res, 200, { assessment });
+  },
+  'GET /api/gymtrack/plan': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const plan = readPlan(user.id);
+    if (!plan) return json(res, 200, { plan: null, stale: false });
+    const storedAssessment = readAssessment(user.id);
+    const currentAssessment = storedAssessment
+      ? normalizeAssessmentDraft(storedAssessment, storedAssessment.updatedAt || new Date().toISOString()).assessment
+      : null;
+    const stale = !currentAssessment || plan.sourceAssessmentUpdatedAt !== currentAssessment.updatedAt;
+    json(res, 200, { plan, stale });
+  },
+  'POST /api/gymtrack/plan': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => key !== 'regenerate')
+      || (body.regenerate !== undefined && typeof body.regenerate !== 'boolean')) {
+      return json(res, 400, { error: 'invalid plan request', code: 'request-invalid' });
+    }
+    const storedAssessment = readAssessment(user.id);
+    if (!storedAssessment) return json(res, 409, { error: 'No existe una evaluación guardada.', code: 'assessment-missing' });
+    const normalized = normalizeAssessmentDraft(storedAssessment, storedAssessment.updatedAt || new Date().toISOString());
+    if (!normalized.ok) return json(res, 409, { error: 'La evaluación guardada no es válida.', code: 'level-not-ready' });
+    const assessment = normalized.assessment;
+    const existing = readPlan(user.id);
+    const stale = !!existing && existing.sourceAssessmentUpdatedAt !== assessment.updatedAt;
+    if (existing && stale && body.regenerate !== true) {
+      return json(res, 409, { error: 'La evaluación cambió. Confirma la regeneración para reemplazar el plan guardado.', code: 'plan-stale', stale: true, currentPlan: existing });
+    }
+    if (existing && !stale && body.regenerate !== true) {
+      return json(res, 200, { plan: existing, stale: false, created: false });
+    }
+    const result = generateGymTrackPlan(assessment, { id: `gtp_${crypto.randomUUID()}` });
+    if (!result.ok) return json(res, result.status, {
+      error: result.error,
+      code: result.code === 'plan-entry-gate-blocked' ? 'plan-entry-blocked' : result.code,
+      ...(result.gate ? { gate: result.gate } : {}),
+    });
+    savePlan(user.id, result.plan);
+    audit(req, 'gymtrack.plan.generate', { user, msg: `${result.plan.id}:${result.plan.status}` });
+    json(res, 201, { plan: result.plan, stale: false, created: true });
   },
 
   'POST /api/register/options': async (req, res) => {

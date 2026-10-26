@@ -101,6 +101,7 @@ export const substituteFor = (ex, equipment, taken) => {
 // that leaves it empty). Sets and reps carry over unchanged.
 const fitRoutines = (routines, equipment) => {
   let swapped = 0, dropped = 0
+  const details = []
   const fitted = routines.map(([key, name, emoji, list]) => {
     const taken = new Set(list.map(([id]) => id))
     const out = []
@@ -108,14 +109,15 @@ const fitRoutines = (routines, equipment) => {
       const ex = EXIDX[id]
       if (!ex || eqAvailable(equipment, ex)) { out.push([id, sets, reps]); continue }
       const sub = substituteFor(ex, equipment, taken)
-      if (!sub) { dropped++; continue }
+      if (!sub) { dropped++; details.push({ type: 'removed', routineKey: key, exerciseId: id }); continue }
       taken.add(sub.id)
       swapped++
+      details.push({ type: 'substituted', routineKey: key, exerciseId: id, replacementId: sub.id })
       out.push([sub.id, sets, reps])
     }
     return [key, name, emoji, out]
   }).filter(([, , , list]) => list.length)
-  return { routines: fitted, swapped, dropped }
+  return { routines: fitted, swapped, dropped, details }
 }
 
 // Fresh routines plus the weekdays to put them on, or null for an unknown id — a caller that
@@ -132,6 +134,6 @@ export const buildStarterPlan = (id, equipment) => {
   return {
     routines,
     schedule: plan.schedule.filter(([, key]) => byKey[key]).map(([day, key]) => ({ day, routineId: byKey[key] })),
-    ...(fit && { fit: { swapped: fit.swapped, dropped: fit.dropped } })
+    ...(fit && { fit: { swapped: fit.swapped, dropped: fit.dropped, details: fit.details } })
   }
 }

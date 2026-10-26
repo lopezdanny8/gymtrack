@@ -111,7 +111,7 @@ describe('fitting a starter plan to equipment', () => {
     const all = ALL_EQUIPMENT
     const fitted = buildStarterPlan('ppl', all)
     expect(fitted.routines.map(shape)).toEqual(APPROVED.ppl.map(([, , list]) => list))
-    expect(fitted.fit).toEqual({ swapped: 0, dropped: 0 })
+    expect(fitted.fit).toEqual({ swapped: 0, dropped: 0, details: [] })
   })
 
   it('has no fit report when no equipment is given', () => {

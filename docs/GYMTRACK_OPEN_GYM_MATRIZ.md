@@ -2,7 +2,7 @@
 
 > Documento de análisis. No representa todavía decisiones finales de implementación y no modifica la lógica de la aplicación.
 >
-> Fuentes revisadas: `GymTrack_Mockups_v7_Completo.pdf`, `GymTrack — Guía completa de funcionalidad de los mockups (v7).pdf` y la estructura actual del repositorio openGym.
+> Fuentes revisadas: la guía funcional v7 como fuente de reglas; `GymTrack_Mockups_v7_Completo.pdf` como referencia visual, sin tomar sus datos de muestra como reglas; y la estructura actual del repositorio openGym.
 
 ## Objetivo
 
@@ -30,19 +30,19 @@ Determinar qué partes de GymTrack se pueden reutilizar desde openGym, cuáles r
 | Perfil físico | Hay datos de usuario y peso/progreso | Adaptar | Falta el flujo específico de fecha de nacimiento, sexo, IMC y molestias. |
 | IMC | No es el eje actual del onboarding | Construir | Debe calcularse como referencia, no como diagnóstico. |
 | Molestias por zona y lado | Hay datos de entrenamiento y ejercicios, pero no el flujo GymTrack completo | Construir | Requiere zonas, lateralidad, intensidad y estado temporal. |
-| PAR-Q obligatorio | No existe como flujo GymTrack completo | Construir | Debe bloquear la entrega del plan hasta completarse. |
-| PAR-Q positivo | No existe con semáforo y limitación de intensidad | Construir | Debe diferenciarse de dolor localizado. |
-| Experiencia de entrenamiento | Existe información relacionada, pero no el asistente GymTrack | Adaptar | Se necesita captura estructurada y validación de mínimo de 6 meses. |
-| Cálculo de nivel 0–8 | No existe con los cuatro criterios de GymTrack | Construir | Debe vivir en backend y explicar los puntos obtenidos. |
-| Objetivos fuerza/hipertrofia/recomposición/rendimiento | Existe planificación y progresión, pero hay que confirmar el modelo actual | Adaptar | Requiere mapear objetivos a plantillas y reglas. |
-| Requisito de 6 meses y 2 días/semana | No existe como puerta de entrada GymTrack | Construir | Debe existir una salida amable sin crear plan. |
+| PAR-Q obligatorio | Onboarding web de siete preguntas, resumen y gate P8 derivado | Adaptar | La futura generación todavía debe bloquearse mientras el PAR-Q esté incompleto. |
+| PAR-Q positivo | El gate P8 permite continuar si está completo y devuelve intensidad limitada/recomendación profesional | Adaptar | El futuro generador debe aplicar la limitación al plan; no bloquear zonas por sí solo. |
+| Experiencia de entrenamiento | P7 web captura meses, días entrenados actuales, serie reciente de press, método de progresión y objetivo | Adaptar | P9 `availability.daysPerWeek` es disponibilidad futura, no frecuencia actual. La regla v1 usa Epley entre 2 y 10 repeticiones; si falta serie válida, el nivel queda Intermedio provisional sin total ficticio. |
+| Cálculo de nivel 0–8 | `api/gymtrack/assessment.js` calcula el nivel v1 y el resumen web muestra puntaje, criterios y métrica de banca | Adaptar | Cuatro criterios de 0–2; Epley 2–10 reps; 0–4 Intermedio / 5–8 Avanzado; serie ausente produce Intermedio provisional sin total. Integrar la reevaluación cada 8 semanas al ciclo de plan; los cortes por sexo son heurísticos y deben validarse con uso real. |
+| Objetivos fuerza/hipertrofia/recomposición/rendimiento | La pantalla web P7 ya usa los cuatro objetivos v7; pueden existir borradores con valores anteriores | Adaptar | No traducir automáticamente objetivos legacy; solicitar una selección vigente cuando se vuelva a editar el paso. |
+| Requisito de 6 meses y 2 días/semana | El backend ya deriva el estado y las causas a partir de meses y frecuencia actual P7 | Adaptar | La futura generación todavía debe bloquearse si no cumple y ofrecer la salida P8. PAR-Q completo también debe ser requisito para generar plan. |
 | Disponibilidad semanal | Existe planificación semanal | Adaptar | Hay que validar días concretos y mínimo de 48 h por grupo muscular. |
 | Horario y duración disponible | Hay duración y descanso en sesiones | Adaptar | Debe alimentar la asignación y el ajuste por tiempo. |
 | Sueño | No existe con la regla GymTrack completa | Construir | Debe influir en volumen y mostrarse como explicación. |
 | Equipamiento disponible | Existe filtrado de ejercicios por equipo | Adaptar | Debe incorporarse al generador de planes. |
-| Asignación exacta de plantilla | Existe catálogo/rutinas | Adaptar | Debe combinar días, objetivo, nivel, equipo y restricciones. |
-| Plantilla más cercana | No existe como flujo explícito GymTrack | Construir | Nunca debe dejar al usuario sin plan; debe informar qué cambió. |
-| Ciclo de cuatro semanas | Existe planificación/progresión relacionada | Adaptar | Confirmar base, progresión, intensificación y descarga. |
+| Asignación exacta de plantilla | Existe catálogo/rutinas | Adaptar | Combinar días y nivel primero, luego el objetivo más cercano, equipo y restricciones. |
+| Plantilla más cercana | No existe como flujo explícito GymTrack | Construir | Asignar la más cercana, informar las diferencias y permitir cambiar días u objetivo; no dejar sin plan a un usuario elegible con PAR-Q completo. |
+| Ciclo de cuatro semanas | Existe planificación/progresión relacionada | Adaptar | v7 define base, progresión, intensificación y descarga −40 %; la semana de descarga no sirve como base del ciclo siguiente. |
 | Personalización del plan | Existe edición de rutinas | Adaptar | Hay que agregar advertencias y evitar guardar una sesión vacía. |
 | Panel principal | Existe dashboard de entrenamiento | Adaptar | Añadir semáforo, nivel, racha, meta semanal y estados globales. |
 | Semáforo verde/amarillo/rojo | No existe con las reglas GymTrack | Construir | Es uno de los motores de negocio principales. |
@@ -125,6 +125,7 @@ Para una etapa posterior:
 - Confirmar si sueño y semáforo aplican la mayor reducción, no ambas sumadas.
 - Confirmar descarga de reingreso del 40 %.
 - Decidir si RPE reemplaza completamente a RIR.
-- Definir el modelo exacto de niveles y plantillas.
+- Definir la tabla de puntuación 0/1/2 para los cuatro criterios, incluidos los límites del ratio 1RM de press de banca / peso corporal; los datos y puntajes del mockup son ejemplos visuales, no reglas.
+- Completar la cobertura del catálogo de plantillas por días, objetivo y nivel.
 - Confirmar qué datos de salud puede procesar el motor y cuáles nunca salen hacia servicios externos.
 - Definir la primera versión visual de GymTrack sin rediseñar toda la aplicación a la vez.

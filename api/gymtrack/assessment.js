@@ -46,13 +46,158 @@ export function validatePhysicalProfile(profile = {}) {
 
 const cleanText = (value, max = 80) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 
+export function evaluateTrainingEligibility({ months, trainingDaysPerWeek } = {}) {
+  const missing = [];
+  if (!Number.isFinite(months)) missing.push('months');
+  if (!Number.isInteger(trainingDaysPerWeek) || trainingDaysPerWeek < 0 || trainingDaysPerWeek > 7) {
+    missing.push('trainingDaysPerWeek');
+  }
+  if (missing.length) return { status: 'pending', eligible: null, missing, reasons: [] };
+
+  const reasons = [];
+  if (months < 6) reasons.push('training-duration-under-6-months');
+  if (trainingDaysPerWeek < 2) reasons.push('training-frequency-under-2-days');
+  return {
+    status: reasons.length ? 'ineligible' : 'eligible',
+    eligible: reasons.length === 0,
+    missing: [],
+    reasons,
+  };
+}
+
+export function evaluatePlanEntryGate({ eligibility, parqSummary } = {}) {
+  const blockingReasons = [];
+  const eligibilityStatus = eligibility?.status;
+  const parqComplete = parqSummary?.complete === true;
+  const eligibilityPending = eligibilityStatus === 'pending' || !['eligible', 'ineligible'].includes(eligibilityStatus);
+
+  if (eligibilityPending) blockingReasons.push('eligibility-data-incomplete');
+  else if (eligibilityStatus === 'ineligible' && Array.isArray(eligibility.reasons)) {
+    blockingReasons.push(...eligibility.reasons);
+  }
+  if (!parqComplete) blockingReasons.push('parq-incomplete');
+
+  const passed = eligibilityStatus === 'eligible' && parqComplete;
+  const requiresLimitedIntensity = parqSummary?.hasPositive === true;
+  return {
+    status: eligibilityPending ? 'pending' : passed ? 'passed' : 'blocked',
+    passed: eligibilityPending ? null : passed,
+    blockingReasons,
+    requiresLimitedIntensity,
+    consultationRecommended: requiresLimitedIntensity,
+  };
+}
+
+const roundTo = (value, places) => Number(value.toFixed(places));
+
+export function scoreTrainingMonths(months) {
+  if (!Number.isFinite(months) || months < 6) return null;
+  if (months < 12) return 0;
+  if (months <= 36) return 1;
+  return 2;
+}
+
+export function scoreTrainingFrequency(days) {
+  if (!Number.isInteger(days) || days < 2 || days > 7) return null;
+  if (days <= 3) return 0;
+  if (days === 4) return 1;
+  return 2;
+}
+
+export function scoreProgressionMode(mode) {
+  if (mode === 'no_log') return 0;
+  if (mode === 'tracks_loads') return 1;
+  if (mode === 'plan_with_rpe') return 2;
+  return null;
+}
+
+export function estimateBenchPress1RM(weightKg, reps) {
+  if (!isFinitePositive(weightKg) || !Number.isInteger(reps) || reps < 2 || reps > 10) return null;
+  return roundTo(weightKg * (1 + reps / 30), 1);
+}
+
+export function scoreRelativeStrengthRatio(ratio, biologicalSex) {
+  if (!Number.isFinite(ratio) || ratio < 0) return null;
+  if (biologicalSex === 'male') return ratio < 0.9 ? 0 : ratio < 1.2 ? 1 : 2;
+  if (biologicalSex === 'female') return ratio < 0.5 ? 0 : ratio < 0.75 ? 1 : 2;
+  return null;
+}
+
+export function calculateLevelFromAssessment({ experience = {}, profile = {}, eligibility = {} } = {}) {
+  const criteria = {
+    experience: scoreTrainingMonths(experience.months),
+    frequency: scoreTrainingFrequency(experience.trainingDaysPerWeek),
+    relativeStrength: null,
+    progression: scoreProgressionMode(experience.progressionMode),
+  };
+  const bodyweightKg = Number(profile.weightKg);
+  const biologicalSex = profile.biologicalSex;
+  const bestSet = experience.benchPressBestSet;
+  const validBestSet = bestSet && isFinitePositive(Number(bestSet.weightKg))
+    && Number.isInteger(Number(bestSet.reps)) && Number(bestSet.reps) >= 2 && Number(bestSet.reps) <= 10;
+  const estimatedRaw = validBestSet ? Number(bestSet.weightKg) * (1 + Number(bestSet.reps) / 30) : null;
+  const estimated1RMKg = estimatedRaw === null ? null : roundTo(estimatedRaw, 1);
+  const bodyweightRatioRaw = estimatedRaw !== null && isFinitePositive(bodyweightKg) ? estimatedRaw / bodyweightKg : null;
+  const bodyweightRatio = bodyweightRatioRaw === null ? null : roundTo(bodyweightRatioRaw, 3);
+  const benchPressEstimate = { method: 'epley', estimated1RMKg, bodyweightRatio };
+  if (bodyweightRatioRaw !== null) criteria.relativeStrength = scoreRelativeStrengthRatio(bodyweightRatioRaw, biologicalSex);
+
+  const base = { criteria, benchPressEstimate, maxPoints: 8 };
+  if (eligibility.status === 'ineligible') {
+    return {
+      ...base, level: null, status: 'ineligible', points: null,
+      explanation: 'No se calcula el nivel porque aún no cumples el requisito mínimo de experiencia y frecuencia actual.',
+    };
+  }
+  const profileReady = isFinitePositive(bodyweightKg) && ['male', 'female'].includes(biologicalSex);
+  const otherCriteriaReady = criteria.experience !== null && criteria.frequency !== null && criteria.progression !== null;
+  if (eligibility.status !== 'eligible' || !profileReady || !otherCriteriaReady) {
+    return {
+      ...base, level: null, status: 'pending-inputs', points: null,
+      explanation: 'Completa los datos de experiencia, frecuencia actual, sexo y peso corporal para calcular tu nivel.',
+    };
+  }
+  if (!validBestSet) {
+    return {
+      ...base, level: 'intermediate', status: 'provisional', points: null,
+      explanation: 'Nivel intermedio provisional. Agrega una serie reciente de press de banca de 2 a 10 repeticiones para calcular el nivel definitivo.',
+    };
+  }
+  if (criteria.relativeStrength === null) {
+    return {
+      ...base, level: null, status: 'pending-inputs', points: null,
+      explanation: 'Revisa el peso corporal y el sexo del perfil para calcular la fuerza relativa.',
+    };
+  }
+  const scored = calculateLevelFromPoints(criteria);
+  return {
+    ...base,
+    level: scored.level,
+    status: 'scored',
+    points: scored.points,
+    explanation: scored.explanation,
+  };
+}
+
 export function normalizeAssessmentDraft(input = {}, now = new Date().toISOString()) {
   const profile = input.profile && typeof input.profile === 'object' ? input.profile : {};
   const parq = input.parq && typeof input.parq === 'object' ? input.parq : {};
+  const experience = input.experience && typeof input.experience === 'object' ? input.experience : {};
   const availability = input.availability && typeof input.availability === 'object' ? input.availability : {};
   const profileValidation = Object.keys(profile).length ? validatePhysicalProfile(profile) : { ok: false, errors: {} };
   const parqSummary = summarizeParq(parq);
   const invalidParq = Object.entries(parq).filter(([id, value]) => PARQ_QUESTIONS.some(question => question.id === id) && typeof value !== 'boolean').map(([id]) => id);
+  const hasMonths = experience.months !== undefined && experience.months !== null && experience.months !== '';
+  const months = hasMonths ? Number(experience.months) : null;
+  const hasTrainingDays = experience.trainingDaysPerWeek !== undefined && experience.trainingDaysPerWeek !== null && experience.trainingDaysPerWeek !== '';
+  const trainingDaysPerWeek = hasTrainingDays ? Number(experience.trainingDaysPerWeek) : null;
+  const bestSet = experience.benchPressBestSet && typeof experience.benchPressBestSet === 'object' && !Array.isArray(experience.benchPressBestSet)
+    ? experience.benchPressBestSet
+    : null;
+  const hasBenchWeight = bestSet?.weightKg !== undefined && bestSet.weightKg !== null && bestSet.weightKg !== '';
+  const hasBenchReps = bestSet?.reps !== undefined && bestSet.reps !== null && bestSet.reps !== '';
+  const benchWeightKg = hasBenchWeight ? Number(bestSet.weightKg) : null;
+  const benchReps = hasBenchReps ? Number(bestSet.reps) : null;
   const days = Array.isArray(availability.days) ? [...new Set(availability.days.filter(day => Number.isInteger(day) && day >= 0 && day <= 6))].sort((a, b) => a - b) : [];
   const daysPerWeek = Number.isInteger(availability.daysPerWeek) ? availability.daysPerWeek : null;
   const sleepHours = Number.isFinite(availability.sleepHours) ? availability.sleepHours : null;
@@ -64,13 +209,34 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
   if (daysPerWeek !== null && days.length && days.length !== daysPerWeek) errors.days = 'days-do-not-match-frequency';
   if (sleepHours !== null && (sleepHours < 0 || sleepHours > 24)) errors.sleepHours = 'sleep-hours-invalid';
   if (minutes !== null && (minutes < 30 || minutes > 90)) errors.minutes = 'session-minutes-invalid';
-
-  const criteria = input.criteria && typeof input.criteria === 'object' ? {
-    experience: Number.isInteger(input.criteria.experience) ? input.criteria.experience : null,
-    frequency: Number.isInteger(input.criteria.frequency) ? input.criteria.frequency : null,
-    relativeStrength: Number.isInteger(input.criteria.relativeStrength) ? input.criteria.relativeStrength : null,
-    progression: Number.isInteger(input.criteria.progression) ? input.criteria.progression : null,
-  } : null;
+  const experienceErrors = {};
+  if (hasMonths && (!Number.isFinite(months) || months < 0)) experienceErrors.months = 'training-months-invalid';
+  if (hasTrainingDays && (!Number.isInteger(trainingDaysPerWeek) || trainingDaysPerWeek < 0 || trainingDaysPerWeek > 7)) {
+    experienceErrors.trainingDaysPerWeek = 'training-days-per-week-invalid';
+  }
+  if (hasBenchWeight !== hasBenchReps) {
+    experienceErrors.benchPressBestSet = 'bench-set-requires-weight-and-reps';
+  } else if (hasBenchWeight && (!Number.isFinite(benchWeightKg) || benchWeightKg <= 0 || !Number.isInteger(benchReps))) {
+    experienceErrors.benchPressBestSet = 'bench-set-invalid';
+  } else if (hasBenchWeight && (benchReps < 2 || benchReps > 10)) {
+    experienceErrors.benchPressBestSet = 'bench-set-reps-outside-estimation-range';
+  }
+  if (Object.keys(experienceErrors).length) errors.experience = experienceErrors;
+  const eligibility = evaluateTrainingEligibility({ months, trainingDaysPerWeek });
+  const planEntryGate = evaluatePlanEntryGate({ eligibility, parqSummary });
+  const levelResult = calculateLevelFromAssessment({
+    experience: {
+      months,
+      trainingDaysPerWeek,
+      progressionMode: cleanText(experience.progressionMode, 32),
+      benchPressBestSet: hasBenchWeight && hasBenchReps && isFinitePositive(benchWeightKg)
+        && Number.isInteger(benchReps) && benchReps >= 2 && benchReps <= 10
+        ? { weightKg: benchWeightKg, reps: benchReps }
+        : null,
+    },
+    profile: { weightKg: Number(profile.weightKg), biologicalSex: cleanText(profile.biologicalSex, 24) },
+    eligibility,
+  });
 
   return {
     ok: Object.keys(errors).length === 0,
@@ -91,8 +257,12 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
       parq: Object.fromEntries(PARQ_QUESTIONS.filter(({ id }) => typeof parq[id] === 'boolean').map(({ id }) => [id, parq[id]])),
       parqSummary,
       experience: {
-        ...(Number.isFinite(Number(input.experience?.months)) ? { months: Number(input.experience.months) } : {}),
-        ...(cleanText(input.experience?.progressionMode, 32) ? { progressionMode: cleanText(input.experience.progressionMode, 32) } : {})
+        ...(Number.isFinite(months) ? { months } : {}),
+        ...(Number.isInteger(trainingDaysPerWeek) ? { trainingDaysPerWeek } : {}),
+        ...(hasBenchWeight && hasBenchReps && Number.isFinite(benchWeightKg) && Number.isInteger(benchReps) ? {
+          benchPressBestSet: { weightKg: benchWeightKg, reps: benchReps }
+        } : {}),
+        ...(cleanText(experience.progressionMode, 32) ? { progressionMode: cleanText(experience.progressionMode, 32) } : {})
       },
       objective: cleanText(input.objective, 32),
       availability: {
@@ -103,9 +273,15 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
         ...(sleepHours !== null ? { sleepHours } : {}),
         equipment: Array.isArray(availability.equipment) ? availability.equipment.filter(item => typeof item === 'string').map(item => item.trim().slice(0, 32)).filter(Boolean).slice(0, 20) : []
       },
-      level: null,
-      levelStatus: criteria && Object.values(criteria).every(value => value !== null) ? 'ready-for-scoring' : 'pending-scoring-thresholds',
-      criteria
+      eligibility,
+      planEntryGate,
+      level: levelResult.level,
+      levelStatus: levelResult.status,
+      levelPoints: levelResult.points,
+      levelMaxPoints: levelResult.maxPoints,
+      criteria: levelResult.criteria,
+      benchPressEstimate: levelResult.benchPressEstimate,
+      levelExplanation: levelResult.explanation,
     }
   };
 }
