@@ -107,7 +107,8 @@ Aplicar un plan marca las rutinas nuevas como GymTrack sin reemplazar rutinas ex
 
 El Workout Web ofrece, al completar las series de una rutina GymTrack, un campo RPE único por ejercicio. Ese valor se conserva en la entrada activa, pasa al workout terminado y tiene prioridad sobre el agregado por serie al juzgar la doble progresión. El control de esfuerzo por serie existente se mantiene.
 
-Siguiente subunidad: reevaluación periódica del nivel y cierre de Fase 4.
+### Unidad completada: reevaluación periódica base
+El plan expone una fecha de inicio (`generatedAt`) y el assessment conserva `reevaluation.lastAt`. A las ocho semanas se muestra un aviso Web; `POST /api/gymtrack/reassessment` marca la reevaluación con una acción explícita y no modifica la semana activa. El disparador temprano basado en progreso queda como siguiente unidad.
 
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 

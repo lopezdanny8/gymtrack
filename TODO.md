@@ -34,7 +34,8 @@
 - [x] Estimar 1RM de press con Epley solo para 2–10 repeticiones y puntuar ratio: masculino <0,90=0, 0,90–<1,20=1, ≥1,20=2; femenino <0,50=0, 0,50–<0,75=1, ≥0,75=2. Usar siempre el peso corporal en kg.
 - [x] Si falta una serie válida pero los demás datos están completos y la persona es elegible, mostrar Intermedio provisional sin fabricar puntos ni total sobre 8; al agregar la serie, recalcular.
 - [x] Clasificar 0–4 como Intermedio y 5–8 como Avanzado, y mostrar puntaje, desglose y explicación en el resumen web.
-- [ ] Programar la reevaluación cada 8 semanas desde el inicio del plan, o antes cuando el progreso lo justifique.
+- [x] Programar la reevaluación cada 8 semanas desde el inicio del plan, con una acción explícita y estado auditable mediante `POST /api/gymtrack/reassessment`; no modifica la semana activa.
+- [ ] Añadir un disparador temprano de reevaluación cuando el progreso registrado lo justifique.
 - [x] El servidor selecciona la plantilla exacta por días, nivel y objetivo; si Full Body repetiría músculos antes de 48 horas, 2 días usa Superior/Inferior A y 3 días usa Empuje/Jalón/Piernas. Si equipo/calendario no permiten una rutina utilizable, no persiste una rutina incompleta y devuelve el motivo.
 - [x] Construir el catálogo real para 2–6 días con IDs del catálogo de ejercicios, prescripción por objetivo/nivel y ajuste por equipo; los nombres de las rutinas base de openGym no se usan para inferir nivel u objetivo.
 - [x] Implementar `GET/POST /api/gymtrack/plan`, persistencia privada `gymtrack-plan-{userId}.json`, respuesta idempotente por `assessment.updatedAt` y regeneración explícita con `regenerate: true` si cambió la evaluación.

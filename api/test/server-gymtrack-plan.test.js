@@ -111,7 +111,16 @@ test('GymTrack plan API valida, genera idempotentemente, requiere regenerar asse
 
   const fetched = await fetch(`${h.api}/api/gymtrack/plan`, { headers });
   assert.equal(fetched.status, 200);
-  assert.deepEqual(await fetched.json(), { plan, stale: false });
+  const fetchedBody = await fetched.json();
+  assert.deepEqual(fetchedBody.plan, plan);
+  assert.equal(fetchedBody.stale, false);
+  assert.equal(fetchedBody.reevaluation.status, 'current');
+  assert.equal(fetchedBody.reevaluation.due, false);
+  const confirmed = await fetch(`${h.api}/api/gymtrack/reassessment`, { method: 'POST', headers, body: '{}' });
+  assert.equal(confirmed.status, 200);
+  const confirmedBody = await confirmed.json();
+  assert.equal(confirmedBody.reevaluation.status, 'current');
+  assert.equal(confirmedBody.assessment.reevaluation.lastAt, confirmedBody.reevaluation.lastAt);
   const idempotent = await fetch(`${h.api}/api/gymtrack/plan`, { method: 'POST', headers });
   assert.equal(idempotent.status, 200);
   const idempotentBody = await idempotent.json();

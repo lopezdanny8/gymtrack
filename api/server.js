@@ -36,6 +36,7 @@ import { effectiveRoutineId } from './queue.js';
 import { stampPut } from './sync-stamps.js';
 import { atomicWrite as durableWrite } from './durable.js';
 import { normalizeAssessmentDraft } from './gymtrack/assessment.js';
+import { reassessmentStatus } from './gymtrack/reassessment.js';
 import { generateGymTrackPlan } from './gymtrack/plan.js';
 import { readAssessment, saveAssessment, readPlan, savePlan } from './gymtrack/store.js';
 import { excusedOn, nudgeFor, nudgeWindowOpen, toneOf } from './nudge.js';
@@ -2167,6 +2168,25 @@ const routes = {
     audit(req, 'gymtrack.assessment.save', { user, msg: `v${assessment.version}` });
     json(res, 200, { assessment });
   },
+  'POST /api/gymtrack/reassessment': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length) {
+      return json(res, 400, { error: 'invalid reevaluation request', code: 'request-invalid' });
+    }
+    const stored = readAssessment(user.id);
+    const plan = readPlan(user.id);
+    if (!stored || !plan) return json(res, 409, { error: 'Genera una rutina GymTrack antes de reevaluar.', code: 'plan-missing' });
+    const current = normalizeAssessmentDraft(stored, stored.updatedAt || new Date().toISOString()).assessment;
+    const currentStatus = reassessmentStatus({ plan, assessment: current });
+    if (currentStatus.status === 'not_started') return json(res, 409, { error: 'La rutina GymTrack aún no tiene fecha de inicio.', code: 'plan-start-missing' });
+    const now = new Date().toISOString();
+    const { assessment } = normalizeAssessmentDraft({ ...stored, reevaluation: { lastAt: now } }, stored.updatedAt || now);
+    saveAssessment(user.id, assessment);
+    audit(req, 'gymtrack.reassessment.confirm', { user, msg: now });
+    json(res, 200, { assessment, reevaluation: reassessmentStatus({ plan, assessment, now }) });
+  },
   'GET /api/gymtrack/plan': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
@@ -2177,7 +2197,8 @@ const routes = {
       ? normalizeAssessmentDraft(storedAssessment, storedAssessment.updatedAt || new Date().toISOString()).assessment
       : null;
     const stale = !currentAssessment || plan.sourceAssessmentUpdatedAt !== currentAssessment.updatedAt;
-    json(res, 200, { plan, stale });
+    const reevaluation = reassessmentStatus({ plan, assessment: currentAssessment });
+    json(res, 200, { plan, stale, reevaluation });
   },
   'POST /api/gymtrack/plan': async (req, res) => {
     const user = readSession(req);

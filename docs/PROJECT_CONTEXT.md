@@ -45,7 +45,7 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 
 1. **Completado:** `/gymtrack/routine` muestra el preview, ciclo, ajustes por equipo, gate y estado de revisión; creación/regeneración es explícita y la semana activa no se toca.
 2. **Completado:** “Aplicar Plan” con confirmación de colisiones, conservación de rutinas existentes, días no seleccionados y modo de rotación; bloqueo de `review_required`.
-3. **En curso:** reevaluación periódica del nivel y cierre de Fase 4. GymTrack ya registra un RPE único por ejercicio al finalizar sus series, conserva el control de esfuerzo por serie y exige dos sesiones consecutivas completas con RPE ≤ 8 para aumentar carga.
+3. **En curso:** disparador temprano por progreso y cierre de Fase 4. La reevaluación base cada 8 semanas ya tiene aviso Web, estado auditable y confirmación explícita en `POST /api/gymtrack/reassessment`; no modifica la semana activa.
 4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 
 ## Diagnóstico local actual

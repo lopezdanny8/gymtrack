@@ -384,6 +384,35 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /api/gymtrack/reassessment:
+    post:
+      tags: [gymtrack]
+      operationId: confirmGymTrackReassessment
+      summary: Confirm the current user's GymTrack reassessment
+      description: >-
+        Records an explicit review of the current server-derived level and starts a new
+        eight-week interval. It does not modify the active openGym week or regenerate a plan.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Reassessment confirmed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [assessment, reevaluation]
+                properties:
+                  assessment: { $ref: '#/components/schemas/GymTrackAssessment' }
+                  reevaluation: { $ref: '#/components/schemas/GymTrackReevaluation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
   /api/gymtrack/plan:
     get:
       tags: [gymtrack]
@@ -3538,6 +3567,10 @@ components:
       properties:
         version: { type: integer, const: 1 }
         updatedAt: { type: string, format: date-time }
+        reevaluation:
+          type: object
+          properties:
+            lastAt: { type: string, format: date-time }
         profile: { type: object, additionalProperties: true }
         parq: { type: object, additionalProperties: { type: boolean } }
         parqSummary: { type: object, additionalProperties: true }
@@ -3597,6 +3630,16 @@ components:
             bodyweightRatio: { type: [number, 'null'], minimum: 0 }
         levelExplanation: { type: string }
 
+    GymTrackReevaluation:
+      type: object
+      required: [status, due, startedAt, lastAt, dueAt]
+      properties:
+        status: { type: string, enum: [not_started, current, due] }
+        due: { type: boolean }
+        startedAt: { type: [string, 'null'], format: date-time }
+        lastAt: { type: [string, 'null'], format: date-time }
+        dueAt: { type: [string, 'null'], format: date-time }
+
     GymTrackPlanRequest:
       type: object
       additionalProperties: false
@@ -3612,6 +3655,7 @@ components:
             - type: 'null'
             - $ref: '#/components/schemas/GymTrackPlan'
         stale: { type: boolean }
+        reevaluation: { $ref: '#/components/schemas/GymTrackReevaluation' }
 
     GymTrackPlanCreateResponse:
       type: object

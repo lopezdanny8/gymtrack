@@ -49,7 +49,7 @@ Estado: completada. Captura P7, elegibilidad, gate P8 y cálculo/visualización 
 - [x] `POST /api/gymtrack/plan` impide generar si P8 está pendiente/bloqueado y exige PAR-Q completo; la vista web presenta los motivos y enlaces para corregir PAR-Q o experiencia.
 - [x] Implementar en servidor las reglas v1 de [GYMTRACK_LEVEL_PLAN_PROPOSAL.md](GYMTRACK_LEVEL_PLAN_PROPOSAL.md): bandas experiencia/frecuencia/progresión, Epley para 2–10 reps y cortes de fuerza relativa por sexo.
 - [x] Con cuatro criterios completos, clasificar 0–4 como Intermedio y 5–8 como Avanzado; mostrar puntos, desglose y explicación.
-- [ ] Reevaluar el nivel cada 8 semanas desde el inicio del plan o antes si el progreso lo justifica.
+- [x] Reevaluar el nivel cada 8 semanas desde el inicio del plan mediante un aviso y confirmación explícita; el disparador temprano por progreso queda como subpaso posterior.
 - [x] Si falta una serie válida, devolver Intermedio provisional sin puntaje total; al añadir una serie válida, recalcular en servidor.
 - [x] El generador exige PAR-Q completo y, ante una respuesta positiva, guarda un borrador de baja intensidad `review_required` con `activationAllowed: false`; el gate interno no es autorización médica.
 

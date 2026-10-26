@@ -50,17 +50,39 @@ function Value({ label, value }) {
 export default function GymTrackSummary() {
   const navigate = useNavigate()
   const [assessment, setAssessment] = useState(null)
+  const [reevaluation, setReevaluation] = useState(null)
+  const [reevaluating, setReevaluating] = useState(false)
+  const [reevaluationMessage, setReevaluationMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let active = true
-    api('/api/gymtrack/assessment')
-      .then(body => { if (active) setAssessment(body?.assessment || {}) })
+    Promise.all([api('/api/gymtrack/assessment'), api('/api/gymtrack/plan')])
+      .then(([assessmentBody, planBody]) => {
+        if (!active) return
+        setAssessment(assessmentBody?.assessment || {})
+        setReevaluation(planBody?.reevaluation || null)
+      })
       .catch(e => { if (active) setError(e?.status === 401 ? 'Inicia sesión para consultar tu evaluación.' : 'No pudimos cargar tu evaluación.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+
+  const confirmReevaluation = async () => {
+    setReevaluating(true)
+    setReevaluationMessage('')
+    try {
+      const body = await api('/api/gymtrack/reassessment', { method: 'POST', body: '{}' })
+      setAssessment(body?.assessment || assessment)
+      setReevaluation(body?.reevaluation || null)
+      setReevaluationMessage('Evaluación confirmada. Tu nivel queda revisado durante las próximas ocho semanas.')
+    } catch (problem) {
+      setReevaluationMessage(problem?.data?.error || 'No pudimos confirmar la reevaluación. Inténtalo de nuevo.')
+    } finally {
+      setReevaluating(false)
+    }
+  }
 
   if (loading) return <div className="narrow"><div className="empty">Cargando tu resumen…</div></div>
   if (error) return <div className="narrow"><div className="card" role="alert" style={{ color: 'var(--red)' }}>{error}</div></div>
@@ -175,6 +197,15 @@ export default function GymTrackSummary() {
           <div className="small muted" style={{ gridColumn: '1 / -1', marginTop: 4 }}>{assessment?.levelExplanation || 'El servidor calculará el nivel cuando estén disponibles los datos necesarios.'}</div>
         </div>
       </section>
+      {reevaluation?.due && <section className="card" role="status" style={{ marginTop: 12 }}>
+        <strong>Tu nivel necesita una reevaluación</strong>
+        <p className="small muted" style={{ margin: '6px 0 10px' }}>Han pasado ocho semanas desde el inicio o la última confirmación del plan. Revisa tus datos y confirma la reevaluación; esto no modifica tu semana activa.</p>
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <Button variant="plain" onClick={() => navigate('/onboarding/profile')}>Actualizar datos</Button>
+          <Button variant="primary" disabled={reevaluating} onClick={confirmReevaluation}>{reevaluating ? 'Confirmando…' : 'Confirmar reevaluación'}</Button>
+        </div>
+        {reevaluationMessage && <p className="small muted" role="alert" style={{ marginTop: 8 }}>{reevaluationMessage}</p>}
+      </section>}
       {!MOBILE ? <>
         <div className="card small muted" style={{ marginTop: 8 }}>Desde aquí puedes crear o consultar la vista previa de tu rutina; tu semana activa no se modificará.</div>
         <Button variant="primary" onClick={() => navigate('/gymtrack/routine')} style={{ width: '100%', marginTop: 8 }}>

@@ -184,6 +184,7 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
   const parq = input.parq && typeof input.parq === 'object' ? input.parq : {};
   const experience = input.experience && typeof input.experience === 'object' ? input.experience : {};
   const availability = input.availability && typeof input.availability === 'object' ? input.availability : {};
+  const reevaluation = input.reevaluation && typeof input.reevaluation === 'object' ? input.reevaluation : {};
   const profileValidation = Object.keys(profile).length ? validatePhysicalProfile(profile) : { ok: false, errors: {} };
   const parqSummary = summarizeParq(parq);
   const invalidParq = Object.entries(parq).filter(([id, value]) => PARQ_QUESTIONS.some(question => question.id === id) && typeof value !== 'boolean').map(([id]) => id);
@@ -244,6 +245,8 @@ export function normalizeAssessmentDraft(input = {}, now = new Date().toISOStrin
     assessment: {
       version: 1,
       updatedAt: now,
+      ...(typeof reevaluation.lastAt === 'string' && !Number.isNaN(Date.parse(reevaluation.lastAt))
+        ? { reevaluation: { lastAt: new Date(reevaluation.lastAt).toISOString() } } : {}),
       profile: {
         ...(profile.birthDate ? { birthDate: cleanText(profile.birthDate, 10) } : {}),
         ...(profile.biologicalSex ? { biologicalSex: cleanText(profile.biologicalSex, 24) } : {}),
