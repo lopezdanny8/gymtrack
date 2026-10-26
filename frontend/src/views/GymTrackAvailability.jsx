@@ -62,7 +62,7 @@ export default function GymTrackAvailability() {
         method: 'PUT',
         body: JSON.stringify({ availability: { daysPerWeek, days, startTime, minutes: Number(minutes), sleepHours: Number(sleepHours), equipment } })
       })
-      window.setTimeout(() => navigate('/home'), 250)
+      window.setTimeout(() => navigate('/onboarding/summary'), 250)
     } catch (e) {
       setError(e?.status === 401 ? 'Inicia sesión para guardar tu evaluación.' : 'No pudimos guardar tus datos. Inténtalo de nuevo.')
     } finally { setSaving(false) }

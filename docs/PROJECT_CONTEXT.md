@@ -27,14 +27,14 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 - Pantalla web `/onboarding/parq` con las siete preguntas y guardado progresivo.
 - Pantalla web `/onboarding/experience` para meses de experiencia, forma actual de progresar y objetivo.
 - Pantalla web `/onboarding/availability` para días, duración, hora, sueño y equipamiento.
+- Pantalla web `/onboarding/summary` para revisar y editar el borrador antes de confirmar.
 
 ## Próximos pasos recomendados
 
-1. Crear el resumen editable de la evaluación.
-2. Confirmar las reglas de elegibilidad y asignación de nivel.
-3. Definir el modelo de plan inicial antes de implementar generación automática.
-4. Añadir persistencia de objetivos y plan cuando el flujo esté probado en web.
-5. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
+1. Confirmar las reglas de elegibilidad y asignación de nivel.
+2. Definir el modelo de plan inicial antes de implementar generación automática.
+3. Añadir persistencia de objetivos y plan cuando el flujo esté probado en web.
+4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 
 ## Decisiones que todavía requieren confirmación
 

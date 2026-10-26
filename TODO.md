@@ -15,6 +15,7 @@
 - [x] La pantalla web `/onboarding/parq` muestra las siete preguntas y guarda respuestas parciales sin borrar el perfil.
 - [x] La pantalla web `/onboarding/experience` guarda meses de experiencia, modo actual de progresión y objetivo principal.
 - [x] La pantalla web `/onboarding/availability` guarda días, duración, hora, sueño y equipamiento disponible.
+- [x] La pantalla web `/onboarding/summary` muestra todas las secciones y permite editarlas antes de confirmar.
 - [ ] El usuario puede completar progresivamente perfil físico, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento sin perder los datos escritos si falla la conexión.
 - [x] El backend web dispone de `GET/PUT /api/gymtrack/assessment`, valida los campos imposibles de las secciones recibidas y conserva el borrador en un archivo aislado por usuario.
 - [ ] El sistema puede representar el requisito de seis meses de experiencia y dos días semanales, mostrando una salida clara si no se cumple; el bloqueo definitivo queda pendiente de confirmación del grupo.

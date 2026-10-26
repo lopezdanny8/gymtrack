@@ -6,6 +6,7 @@
     { "path": "/onboarding/parq", "title": "GymTrack PAR-Q" },
     { "path": "/onboarding/experience", "title": "GymTrack experience" },
     { "path": "/onboarding/availability", "title": "GymTrack availability" },
+    { "path": "/onboarding/summary", "title": "GymTrack summary" },
     { "path": "/checkin", "title": "Check-in" },
     { "path": "/plan", "title": "Plan" },
     { "path": "/plan/r/:id", "title": "Routine" },

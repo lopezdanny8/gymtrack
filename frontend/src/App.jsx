@@ -60,6 +60,7 @@ import GymTrackProfile from './views/GymTrackProfile.jsx'
 import GymTrackParq from './views/GymTrackParq.jsx'
 import GymTrackExperience from './views/GymTrackExperience.jsx'
 import GymTrackAvailability from './views/GymTrackAvailability.jsx'
+import GymTrackSummary from './views/GymTrackSummary.jsx'
 
 // last known scrollY per route, so back-navigation can put the page where it was
 const scrollPositions = new Map()
@@ -253,6 +254,7 @@ function Shell() {
       <Route path="/onboarding/parq" element={<GymTrackParq />} />
       <Route path="/onboarding/experience" element={<GymTrackExperience />} />
       <Route path="/onboarding/availability" element={<GymTrackAvailability />} />
+      <Route path="/onboarding/summary" element={<GymTrackSummary />} />
       {/* Gym check-in — switched off in Settings, the route falls through to the
           catch-all redirect below. */}
       {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}

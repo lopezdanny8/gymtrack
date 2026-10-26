@@ -77,7 +77,7 @@ Semáforo completo, sustituciones seguras, reprogramación, Coach IA, administra
 
 ## Punto actual
 
-Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience` y `/onboarding/availability` están implementadas y conectadas a `GET/PUT /api/gymtrack/assessment`. El siguiente entregable es el resumen editable de la evaluación.
+Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience`, `/onboarding/availability` y `/onboarding/summary` están implementadas y conectadas a `GET/PUT /api/gymtrack/assessment`. El onboarding base está completo; el siguiente paso es la fase de evaluación y nivel.
 
 ## Fuente de verdad para continuar
 
