@@ -36,21 +36,23 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 - `GET/POST /api/gymtrack/plan` es autenticado e idempotente por revisión `assessment.updatedAt`; el plan se guarda en `gymtrack-plan-{userId}.json`, privado y separado de la evaluación y del documento `openGym`. La regeneración de un plan obsoleto requiere `{"regenerate":true}`.
 - Las respuestas positivas en PAR-Q generan solo un borrador `review_required` de baja intensidad, sin progresión ni intensificación y con `activationAllowed: false`.
 - El plan persistido describe las cuatro fases del ciclo y la doble progresión R3; la aplicación real de cargas tras registrar sesiones todavía no existe.
-- `frontend/src/lib/starter.js` sigue siendo la fuente de ejercicios reutilizables. Su ajuste por equipo ahora devuelve IDs de los ejercicios sustituidos o eliminados para poder explicarlos en la futura vista GymTrack.
+- `frontend/src/lib/starter.js` sigue siendo la fuente de ejercicios reutilizables. Su ajuste por equipo devuelve IDs de los ejercicios sustituidos o eliminados y esos cambios se explican en `/gymtrack/routine`.
+- La vista Web `/gymtrack/routine` está implementada y enlazada desde `/onboarding/summary`; muestra rutina, prescripción, ciclo, adaptaciones y gate/errores. La ruta está limitada a Web, no tiene tabs y no modifica `S.week`; generar/regenerar requiere un click explícito.
+- Un plan `review_required` se presenta como borrador de baja intensidad con recomendación de revisión profesional; no hay acción Aplicar Plan en esta vista.
 
 ## Próximos pasos recomendados
 
-1. **En curso:** crear la vista web `/gymtrack/routine` para mostrar semana, fases, prescripción y adaptaciones; presentar errores de disponibilidad y el estado `review_required` con advertencia. Esta unidad es de lectura/vista previa: no modificar `S.week`.
+1. **Completado:** `/gymtrack/routine` muestra el preview, ciclo, ajustes por equipo, gate y estado de revisión; creación/regeneración es explícita y la semana activa no se toca.
 2. **Siguiente unidad, pendiente:** añadir “Aplicar Plan” con confirmación de colisiones, conservando rutinas existentes, días no seleccionados y modo de rotación; bloquear aplicación de `review_required`.
 3. Ajustar volumen según minutos disponibles y conectar sesión, registro RPE/doble progresión y reevaluación de nivel cada 8 semanas.
 4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 
 ## Diagnóstico local actual
 
-- Web y backend arrancan en el sandbox con datos temporales aislados; la página y el manifiesto de rutas responden 200, `/api/health` responde 200 y `GET /api/gymtrack/assessment` devuelve 401 sin sesión (esperado).
-- La consola del navegador no muestra errores al cargar la pantalla inicial.
-- El build de producción web termina correctamente; emite avisos por chunks grandes e imports dinámicos que también tienen imports estáticos.
-- Tras implementar generación y persistencia de rutina v1, la suite backend pasa 664/664; las pruebas web relacionadas con starter pasan 48/48, y el build de producción termina correctamente. OpenAPI y las rutas quedan sincronizadas (3/3 pruebas). La última suite web completa previa tenía 5,562/5,562 pruebas; el build aún reporta los avisos previos de chunks grandes e imports dinámicos inefectivos.
+- El Vite de preview ya activo sirve `/gymtrack/routine` y `/manus-routes.json` con HTTP 200; el manifiesto incluye el deep link nuevo.
+- El build de producción Web termina correctamente; conserva los avisos existentes sobre chunks grandes e imports dinámicos también importados estáticamente.
+- Verificación de esta unidad: vista 6/6, rutas/CTA/manifiesto 2/2 y endpoints de plan/evaluación más OpenAPI 10/10. El test frontend completo más reciente tuvo 446/449 archivos y 5.561/5.569 tests aprobados. Los 8 fallos se concentran en tres suites existentes de swipe; los mismos archivos fallan en un worktree limpio del commit previo `342b305`, por lo que no son regresiones de esta unidad.
+- En la fase backend anterior, la suite completa pasó 664/664 y los tests web afectados por el ajuste de starter pasaron 48/48; esos cambios quedaron publicados antes de iniciar esta vista.
 - La instalación reportó alertas de auditoría de dependencias (12 frontend y 1 high en API); no se ejecutó `npm audit fix` ni se cambiaron dependencias.
 
 ## Reglas v1 decididas y riesgos a validar

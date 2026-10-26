@@ -36,7 +36,7 @@ Orden aprobado:
 
 Cada pantalla debe poder cargar el borrador, validar sus propios campos y guardar sin borrar las secciones anteriores.
 
-P7 de la guía funcional pide meses entrenando, días que la persona entrena actualmente, mejor serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo. El paso web captura estos insumos, P9 conserva por separado los días disponibles, el backend deriva elegibilidad y calcula el nivel v1, y el resumen muestra su desglose. La generación de rutina sigue pendiente.
+P7 de la guía funcional pide meses entrenando, días que la persona entrena actualmente, mejor serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo. El paso web captura estos insumos, P9 conserva por separado los días disponibles, el backend deriva elegibilidad y calcula el nivel v1, y el resumen muestra su desglose. El backend genera y persiste la rutina; la vista previa web también está implementada. Aplicarla a la semana activa sigue pendiente.
 
 ### Fase 2 — Evaluación y nivel
 
@@ -46,7 +46,7 @@ Estado: completada. Captura P7, elegibilidad, gate P8 y cálculo/visualización 
 - [x] Alinear las opciones de P7 a sin registro / registra cargas / plan con RPE y fuerza / hipertrofia / recomposición / rendimiento.
 - [x] Derivar en backend si la persona cumple el gate de 6 meses y 2 días de entrenamiento actual por semana, incluyendo causas de no elegibilidad.
 - [x] Derivar el estado P8 combinado de elegibilidad + PAR-Q (`pending`/`blocked`/`passed`), incluidas causas de bloqueo y la recomendación de intensidad limitada ante respuestas positivas.
-- [x] `POST /api/gymtrack/plan` impide generar si P8 está pendiente/bloqueado y exige PAR-Q completo; la vista web aún debe presentar los motivos y cómo corregirlos.
+- [x] `POST /api/gymtrack/plan` impide generar si P8 está pendiente/bloqueado y exige PAR-Q completo; la vista web presenta los motivos y enlaces para corregir PAR-Q o experiencia.
 - [x] Implementar en servidor las reglas v1 de [GYMTRACK_LEVEL_PLAN_PROPOSAL.md](GYMTRACK_LEVEL_PLAN_PROPOSAL.md): bandas experiencia/frecuencia/progresión, Epley para 2–10 reps y cortes de fuerza relativa por sexo.
 - [x] Con cuatro criterios completos, clasificar 0–4 como Intermedio y 5–8 como Avanzado; mostrar puntos, desglose y explicación.
 - [ ] Reevaluar el nivel cada 8 semanas desde el inicio del plan o antes si el progreso lo justifica.
@@ -55,14 +55,14 @@ Estado: completada. Captura P7, elegibilidad, gate P8 y cálculo/visualización 
 
 ### Fase 3 — Asignación del plan
 
-Estado: backend implementado; la tarea actual es presentar el plan en `/gymtrack/routine`. Aplicar Plan al calendario web queda como una unidad posterior e independiente.
+Estado: generación, persistencia y vista previa implementadas; la siguiente unidad es Aplicar Plan al calendario web, independiente y aún pendiente.
 
 - [x] Crear el catálogo GymTrack con ejercicios reales para 2–6 días y selección server-side por días, nivel y objetivo; ajustar la prescripción por objetivo/nivel y filtrar por el equipo P9.
 - [x] Usar Full Body A/B (2 días), Full Body A/B/C (3), Upper/Lower A/B (4), Superior/Inferior/Empuje/Jalón/Inferior B (5) y PPL×2 (6). Si Full Body viola las 48 h en 2–3 días, elegir Superior/Inferior A o PPL, respectivamente.
 - [x] Comprobar ejercicios válidos, sustituciones explicables y recuperación de al menos 48 h entre músculos principales; no persistir un plan incompleto si el equipo o el calendario no sirven.
 - [x] Implementar `GET/POST /api/gymtrack/plan` con JSON privado separado por usuario, idempotencia por `assessment.updatedAt`, regeneración explícita del plan obsoleto y sin cambios a `openGym` al generar.
 - [x] Describir Base, Progresión, Intensificación condicional (+2,5 kg según doble progresión y P10) y Descarga (−40 % de volumen); la descarga no es base del siguiente ciclo.
-- [ ] **En curso — solo vista previa.** Crear `/gymtrack/routine` para mostrar la semana, prescripción, ciclo, sustituciones, estado `review_required` y errores que requieran corregir disponibilidad; enlazarla desde el resumen. No modificar `S.week` en esta unidad.
+- [x] Crear `/gymtrack/routine` solo para Web, enlazada desde el resumen y sin tabs. Muestra semana, prescripción, ciclo, sustituciones, estado `review_required` y errores de disponibilidad; crear/regenerar el plan es explícito y la vista no modifica `S.week`.
 - [ ] Aplicar solo mediante acción explícita: conservar rutinas existentes, reprogramar únicamente los días P9 y pedir confirmación ante colisiones; no cambiar modo de rotación y bloquear planes `review_required`.
 - [ ] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9 y ejecutar doble progresión con datos de sesiones registrados.
 
@@ -93,7 +93,7 @@ Coach IA con contexto autorizado, ajuste de sesiones por tiempo disponible, sust
 
 ## Punto actual
 
-Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience`, `/onboarding/availability` y `/onboarding/summary` están conectadas a `GET/PUT /api/gymtrack/assessment`. El backend devuelve elegibilidad, gate P8 y nivel v1; `GET/POST /api/gymtrack/plan` genera y persiste planes GymTrack v1 en un JSON privado separado. El siguiente trabajo es crear `/gymtrack/routine` y la acción segura de Aplicar Plan a la semana activa.
+Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience`, `/onboarding/availability` y `/onboarding/summary` están conectadas a `GET/PUT /api/gymtrack/assessment`. El backend devuelve elegibilidad, gate P8 y nivel v1; `GET/POST /api/gymtrack/plan` genera y persiste planes GymTrack v1 en un JSON privado separado. `/gymtrack/routine` ya muestra el preview y sus estados; el siguiente trabajo es la acción segura de Aplicar Plan a la semana activa.
 
 ## Fuente de verdad para continuar
 

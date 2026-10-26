@@ -21,10 +21,10 @@
 - [x] El bloque web P7 captura meses entrenando, días que la persona entrena actualmente (separados de los días disponibles de P9), serie reciente de press de banca (kg × repeticiones, si se dispone), forma de progresar (sin registro, registra cargas, plan con RPE) y objetivo v7 (fuerza, hipertrofia, recomposición o rendimiento); lo guarda en el borrador autenticado.
 - [x] El backend deriva estados de elegibilidad pendiente/apto/no apto con los meses entrenando y la frecuencia real P7; nunca usa `availability.daysPerWeek` de P9 para este cálculo.
 - [x] El backend combina elegibilidad y PAR-Q en el gate P8 (`pending`/`blocked`/`passed`), con causas y recomendación de intensidad limitada si hay respuesta positiva; el gate no equivale a una rutina generada (el nivel se calcula por separado).
-- [x] `POST /api/gymtrack/plan` impide generar una rutina si P8 no pasa y devuelve los motivos del gate; la vista web aún debe presentar opciones para corregir disponibilidad/respuestas y recomendaciones para empezar.
+- [x] `POST /api/gymtrack/plan` bloquea P8 cuando corresponda; `/gymtrack/routine` presenta los motivos del gate y enlaces para corregir PAR-Q o experiencia, sin permitir generar si los requisitos no pasan.
 - [x] La serie de press se almacena en kg × repeticiones; si falta una serie válida con los demás datos completos y la persona es elegible, el backend muestra Intermedio provisional sin fabricar puntos, y recalcula al agregarla.
 - [x] Las respuestas PAR-Q quedan separadas del documento sincronizado y el backend devuelve su resumen de completitud y estado inicial.
-- [x] `POST /api/gymtrack/plan` exige PAR-Q completo; si hay una respuesta positiva crea un borrador `review_required` de baja intensidad, sin progresión y con `activationAllowed: false`. La pantalla web debe mostrar la advertencia y bloquear Aplicar; el gate no es autorización médica.
+- [x] `POST /api/gymtrack/plan` exige PAR-Q completo; si hay una respuesta positiva crea un borrador `review_required` de baja intensidad, sin progresión y con `activationAllowed: false`. La vista muestra la advertencia profesional; Aplicar Plan aún no está implementado y deberá rechazar ese estado. El gate no es autorización médica.
 - [ ] Antes de lanzamiento público, verificar permiso escrito para el cuestionario oficial PAR-Q+ o sustituir la pantalla actual por un instrumento propio revisado; el flujo actual no incluye el seguimiento oficial de páginas 2–3.
 
 ## Nivel y asignación del plan
@@ -38,7 +38,7 @@
 - [x] El servidor selecciona la plantilla exacta por días, nivel y objetivo; si Full Body repetiría músculos antes de 48 horas, 2 días usa Superior/Inferior A y 3 días usa Empuje/Jalón/Piernas. Si equipo/calendario no permiten una rutina utilizable, no persiste una rutina incompleta y devuelve el motivo.
 - [x] Construir el catálogo real para 2–6 días con IDs del catálogo de ejercicios, prescripción por objetivo/nivel y ajuste por equipo; los nombres de las rutinas base de openGym no se usan para inferir nivel u objetivo.
 - [x] Implementar `GET/POST /api/gymtrack/plan`, persistencia privada `gymtrack-plan-{userId}.json`, respuesta idempotente por `assessment.updatedAt` y regeneración explícita con `regenerate: true` si cambió la evaluación.
-- [ ] **En curso — vista web solamente.** Crear `/gymtrack/routine`: mostrar semana, ciclo, prescripción, sustituciones/equipo, estado `review_required` y errores que requieran corregir disponibilidad; añadir vista previa desde el resumen. No modificar `S.week` ni implementar Aplicar Plan en esta unidad.
+- [x] Crear `/gymtrack/routine` solo en Web y enlazarla desde el resumen; muestra semana/split, prescripción, ciclo, adaptaciones, gates y errores de disponibilidad. Crear/regenerar exige una acción explícita; revisar la vista no modifica `S.week`.
 - [ ] Aplicar solo mediante acción explícita a `S.week`, reasignando únicamente días P9 y confirmando conflictos; conservar rutinas existentes y modo de rotación. Rechazar la aplicación de planes `review_required`.
 - [x] El plan considera objetivo, nivel, días concretos, equipo disponible y 48 horas antes de repetir músculos principales; conserva en el plan la duración P9 de cada sesión. Ajustar el volumen para respetar esa duración queda pendiente.
 - [x] El plan describe cuatro semanas: base, progresión, intensificación condicional (+2,5 kg tras dos sesiones en el tope con RPE ≤ 8) y descarga (−40 % de volumen); la descarga no se usa como base de progresión del ciclo siguiente.
@@ -46,6 +46,11 @@
 ## Incidencia web resuelta durante la verificación
 
 - [x] Cambiar a guion medio `–` el placeholder de hora del resumen en `frontend/src/views/GymTrackSummary.jsx:80`; pasaron la prueba específica y la suite web completa (448/448 archivos).
+
+## Verificación de la vista de rutina
+
+- [x] Pruebas focalizadas: vista GymTrackRoutine 6/6; ruta/CTA/manifiesto Web-only 2/2; endpoints plan/evaluación y OpenAPI 10/10; `vite build`, deep link y manifiesto HTTP correctos.
+- [ ] Incidencia baseline: la última suite frontend completa registró 446/449 archivos aprobados (5.561/5.569 tests). Los 8 fallos están en `Plan.swipe.test.jsx`, `RoutineEdit.swipe.test.jsx` y `Workout.swipe.test.jsx`; los mismos tres archivos fallan al ejecutar el commit previo `342b305` en un worktree limpio, por lo que no se atribuyen a esta vista y quedan como deuda de tests existentes.
 
 ## Primera sesión y progresión
 

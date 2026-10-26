@@ -61,6 +61,7 @@ import GymTrackParq from './views/GymTrackParq.jsx'
 import GymTrackExperience from './views/GymTrackExperience.jsx'
 import GymTrackAvailability from './views/GymTrackAvailability.jsx'
 import GymTrackSummary from './views/GymTrackSummary.jsx'
+import GymTrackRoutine from './views/GymTrackRoutine.jsx'
 
 // last known scrollY per route, so back-navigation can put the page where it was
 const scrollPositions = new Map()
@@ -234,7 +235,7 @@ function Shell() {
   }, [inWorkout])
   // The chat owns the bottom of the screen as well: its composer sits where the tabs would be.
   // The first-launch card has no tabs either: they changed the route behind it.
-  const noTabs = inWorkout || loc.pathname === '/coach' || loc.pathname.startsWith('/onboarding') || needsMobileOnboarding || permSteps
+  const noTabs = inWorkout || loc.pathname === '/coach' || loc.pathname.startsWith('/onboarding') || loc.pathname === '/gymtrack/routine' || needsMobileOnboarding || permSteps
 
   const authed = user || isGuest
   // The boot screen in index.html covers the start; it goes once there is something to show.
@@ -255,6 +256,7 @@ function Shell() {
       <Route path="/onboarding/experience" element={<GymTrackExperience />} />
       <Route path="/onboarding/availability" element={<GymTrackAvailability />} />
       <Route path="/onboarding/summary" element={<GymTrackSummary />} />
+      {!MOBILE && <Route path="/gymtrack/routine" element={<GymTrackRoutine />} />}
       {/* Gym check-in — switched off in Settings, the route falls through to the
           catch-all redirect below. */}
       {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}

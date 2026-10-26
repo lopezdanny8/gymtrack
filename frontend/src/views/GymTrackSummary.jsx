@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
+import { MOBILE } from '../lib/mobile.js'
 
 const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const sexLabels = { male: 'Masculino', female: 'Femenino' }
@@ -174,8 +175,15 @@ export default function GymTrackSummary() {
           <div className="small muted" style={{ gridColumn: '1 / -1', marginTop: 4 }}>{assessment?.levelExplanation || 'El servidor calculará el nivel cuando estén disponibles los datos necesarios.'}</div>
         </div>
       </section>
-      <div className="card small muted" style={{ marginTop: 8 }}>La primera rutina semanal personalizada aún está pendiente de generación.</div>
-      <Button variant="primary" onClick={() => navigate('/home')} style={{ width: '100%', marginTop: 8 }}>Confirmar evaluación</Button>
+      {!MOBILE ? <>
+        <div className="card small muted" style={{ marginTop: 8 }}>Desde aquí puedes crear o consultar la vista previa de tu rutina; tu semana activa no se modificará.</div>
+        <Button variant="primary" onClick={() => navigate('/gymtrack/routine')} style={{ width: '100%', marginTop: 8 }}>
+          {planEntryGate.status === 'passed' ? 'Crear o ver mi rutina' : 'Revisar requisitos de la rutina'}
+        </Button>
+      </> : <>
+        <div className="card small muted" style={{ marginTop: 8 }}>La primera rutina semanal personalizada aún está pendiente de generación.</div>
+        <Button variant="primary" onClick={() => navigate('/home')} style={{ width: '100%', marginTop: 8 }}>Confirmar evaluación</Button>
+      </>}
       <button className="textbtn" onClick={() => navigate('/home')} style={{ display: 'block', margin: '16px auto' }}>Ahora no</button>
     </div>
   )

@@ -1,0 +1,27 @@
+.gt-routine .gt-callout{line-height:1.45;border-inline-start:3px solid var(--acc)}
+.gt-routine .gt-callout>strong{display:block;margin-bottom:4px}
+.gt-routine .gt-callout[data-tone="warning"]{border-inline-start-color:var(--yellow)}
+.gt-routine .gt-callout[data-tone="danger"]{border-inline-start-color:var(--red)}
+.gt-routine .gt-plan-empty h2,.gt-routine .gt-gate h2{font-size:18px;font-weight:600;margin:3px 0 8px}
+.gt-routine .gt-plan-empty p{line-height:1.45;margin:0 0 16px}
+.gt-routine .gt-gate ul{padding-inline-start:20px;color:var(--label-2);line-height:1.5}
+.gt-routine .gt-plan-actions{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:8px}
+.gt-routine .gt-phase-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.gt-routine .gt-phase{min-width:0;background:var(--surface);border-radius:var(--r-card);padding:14px;border-inline-start:3px solid var(--acc)}
+.gt-routine .gt-phase[data-phase="deload"]{border-inline-start-color:var(--yellow)}
+.gt-routine .gt-phase[data-phase="review"]{border-inline-start-color:var(--red)}
+.gt-routine .gt-phase h3{font-size:16px;font-weight:600;margin:0 0 5px}
+.gt-routine .gt-phase p{line-height:1.4;margin:6px 0 0}
+.gt-routine .gt-progression-note{line-height:1.5;margin-top:10px}
+.gt-routine .gt-routine-day-heading{align-items:flex-start;margin-bottom:6px}
+.gt-routine .gt-routine-day-heading h3{font-size:17px;font-weight:600;text-transform:capitalize}
+.gt-routine .gt-routine-day-heading .eyebrow{text-transform:capitalize}
+.gt-routine .gt-exercise-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--sep)}
+.gt-routine .gt-exercise-name{min-width:0;overflow-wrap:anywhere}
+.gt-routine .gt-exercise-name strong{font-size:14px;font-weight:550}
+.gt-routine .gt-exercise-name .small{margin-top:3px}
+.gt-routine .gt-adaptation-list{display:grid;gap:8px}
+.gt-routine .gt-adaptation{background:var(--surface-2);border-radius:var(--r);padding:10px 12px;overflow-wrap:anywhere}
+.gt-routine .gt-adaptation strong{font-size:14px;font-weight:550}
+.gt-routine .gt-adaptation .small{margin-top:3px}
+@media(min-width:520px){.gt-routine .gt-phase-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
