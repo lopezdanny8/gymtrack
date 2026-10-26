@@ -71,7 +71,7 @@ Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados
 - [x] Registrar series y un RPE único por ejercicio al finalizar sus series; conservar el esfuerzo por serie existente.
 
 - Abrir la sesión preparada usando el flujo web existente.
-- [x] Registrar series y RPE para alimentar la prescripción siguiente; falta reevaluación periódica del nivel.
+- [x] Registrar series y RPE para alimentar la prescripción siguiente; la reevaluación periódica y el disparador temprano ya están implementados.
 - [x] Mostrar reevaluación temprana cuando hay dos progresiones GymTrack explícitas separadas por al menos 14 días; la confirmación sigue siendo manual.
 - Implementar la primera versión verificable de doble progresión.
 

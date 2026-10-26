@@ -63,7 +63,7 @@
 ## Primera sesión y progresión
 - [x] Conectar desde la rutina GymTrack la primera sesión Web mediante el flujo existente y conservar el origen GymTrack en las rutinas aplicadas. La subida GymTrack exige dos sesiones consecutivas completas en el tope con RPE máximo 8.
 
-- [ ] El usuario puede abrir la sesión preparada y registrar series válidas reutilizando el flujo actual de openGym.
+- [x] El usuario puede abrir la sesión preparada con el flujo actual de Web y registrar series válidas reutilizando Workout/openGym.
 - [x] El RPE se registra una vez por ejercicio al finalizar sus series en rutinas GymTrack; el control de esfuerzo por serie existente se conserva.
 - [x] Ejecutar la regla inicial de doble progresión al registrar sesiones: solo aumentar la carga después de dos sesiones consecutivas en el límite superior de repeticiones con RPE ≤ 8.
 - [x] Si falta el RPE o no se alcanza el límite superior, la carga no aumenta y el sistema explica el motivo.
@@ -84,6 +84,6 @@
 
 - [ ] Confirmar passkeys, Google OAuth y modo invitado.
 - [ ] Confirmar las siete preguntas PAR-Q y el criterio definitivo de entrada.
-- [ ] Confirmar RPE frente a RIR y la fórmula exacta de progresión.
+- [x] Confirmar RPE frente a RIR y la fórmula exacta de progresión: RPE = 10 − RIR; RPE máximo 8 equivale a RIR mínimo 2; sin RPE no se aumenta carga.
 - [ ] Confirmar las reglas de sueño, descarga y salida del semáforo.
 - [ ] Confirmar la identidad visual final de GymTrack.
