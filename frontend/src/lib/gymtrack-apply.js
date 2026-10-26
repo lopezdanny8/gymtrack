@@ -32,8 +32,18 @@ export function applyGymTrackPlan(state, plan) {
   const preview = getPlanApplicationPreview(plan, state)
   if (!preview.schedule.length || !Array.isArray(plan.routines)) return { ok: false, code: 'invalid-plan' }
   state.routines = Array.isArray(state.routines) ? state.routines : []
-  for (const routine of preview.routinesToAdd) state.routines.push(routine)
+  for (const routine of preview.routinesToAdd) {
+    state.routines.push({
+      ...routine,
+      gymtrack: { planId: plan.id || null, version: 1 },
+    })
+  }
   state.week = { ...(state.week && typeof state.week === 'object' ? state.week : {}) }
   for (const slot of preview.schedule) state.week[dayKey(slot.day)] = [slot.routineId]
-  return { ok: true, days: preview.days, addedRoutineIds: preview.routinesToAdd.map(routine => routine.id) }
+  return {
+    ok: true,
+    days: preview.days,
+    addedRoutineIds: preview.routinesToAdd.map(routine => routine.id),
+    firstRoutineId: preview.schedule[0]?.routineId || null,
+  }
 }

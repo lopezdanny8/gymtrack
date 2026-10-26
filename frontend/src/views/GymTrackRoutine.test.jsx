@@ -168,4 +168,12 @@ describe('GymTrackRoutine', () => {
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('Los días elegidos no permiten espaciar')
     expect(button('Ajustar disponibilidad o equipo')).toBeTruthy()
   })
+
+  it('muestra la acción explícita para iniciar la primera sesión después de aplicar', async () => {
+    api.mockImplementation(path => Promise.resolve(path.endsWith('/assessment') ? { assessment } : { plan: plan(), stale: false }))
+    await mount()
+    await act(async () => { button('Aplicar Plan').click(); await Promise.resolve() })
+    expect(host.querySelector('[data-gt-applied]')).toBeTruthy()
+    expect(button('Iniciar primera sesión')).toBeTruthy()
+  })
 })

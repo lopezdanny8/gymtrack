@@ -60,6 +60,7 @@
 - [x] Suite frontend completa de la unidad Aplicar Plan: 450/450 archivos y 5.573/5.573 tests aprobados. Se conservan los avisos de React ya existentes en algunas pruebas, sin fallos.
 
 ## Primera sesión y progresión
+- [x] Conectar desde la rutina GymTrack la primera sesión Web mediante el flujo existente y conservar el origen GymTrack en las rutinas aplicadas. La subida GymTrack exige dos sesiones consecutivas completas en el tope con RPE máximo 8.
 
 - [ ] El usuario puede abrir la sesión preparada y registrar series válidas reutilizando el flujo actual de openGym.
 - [ ] El RPE se registra una vez por ejercicio al finalizar sus series.

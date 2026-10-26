@@ -102,6 +102,11 @@ La acción vive únicamente en `/gymtrack/routine` y no se ejecuta al consultar 
 ### Unidad completada: duración de sesión P9
 El generador calcula una estimación conservadora por rutina y, si supera los minutos disponibles, reduce primero series accesorias y después ejercicios accesorios, sin bajar de tres ejercicios por rutina. El plan devuelve `duration.targetMinutes`, `estimatedMinutes`, `adjusted` y el detalle auditable de cada recorte; la vista Web lo explica al usuario. La sesión preparada, RPE y doble progresión quedan para la Fase 4.
 
+### Unidad completada: primera sesión y gate de progresión GymTrack
+Aplicar un plan marca las rutinas nuevas como GymTrack sin reemplazar rutinas existentes. La vista ofrece iniciar explícitamente la primera sesión con el flujo Web normal (`startFlow`/`beginWorkout`), conservando pesaje, navegación y persistencia. Para estas rutinas, la subida de carga requiere dos sesiones consecutivas completas en el tope del rango y RPE máximo de 8; una sesión sin RPE conserva la carga y explica el bloqueo.
+
+Siguiente subunidad: añadir un campo RPE único por ejercicio al finalizar sus series, además del control de esfuerzo por serie que ya existe en Workout.
+
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 
 ## Decisiones diferidas

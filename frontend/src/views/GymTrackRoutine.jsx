@@ -7,6 +7,7 @@ import { exOr } from '../lib/exercises.js'
 import { exerciseNameFor, exerciseNameClass } from '../lib/i18n.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
+import { startFlow } from '../sheets.jsx'
 import './gymtrack-routine.css'
 
 const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
@@ -96,6 +97,7 @@ export default function GymTrackRoutine() {
   const [requestError, setRequestError] = useState(null)
   const [applyConfirmation, setApplyConfirmation] = useState(null)
   const [applyMessage, setApplyMessage] = useState('')
+  const [firstRoutineId, setFirstRoutineId] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
@@ -155,6 +157,7 @@ export default function GymTrackRoutine() {
       return
     }
     setApplyConfirmation(null)
+    setFirstRoutineId(result.firstRoutineId)
     setApplyMessage(`Plan aplicado a ${result.days.length} ${result.days.length === 1 ? 'día' : 'días'} de tu semana.`)
   }
 
@@ -256,7 +259,13 @@ export default function GymTrackRoutine() {
       <Notice title={stale ? 'Vista previa desactualizada' : 'Vista previa'}>
         Esta rutina está guardada por separado; consultar o regenerar el plan no modifica tu semana activa.
       </Notice>
-      {applyMessage && <Notice data-gt-applied title="Plan aplicado">{applyMessage} Las rutinas existentes, los días no seleccionados y el modo de rotación se conservaron.</Notice>}
+      {applyMessage && <Notice data-gt-applied title="Plan aplicado">
+        <p>{applyMessage} Las rutinas existentes, los días no seleccionados y el modo de rotación se conservaron.</p>
+        {firstRoutineId && <Button variant="primary" data-gt-start-first onClick={() => {
+          if (useStore.getState().S.active) navigate('/workout')
+          else startFlow([firstRoutineId])
+        }}>Iniciar primera sesión</Button>}
+      </Notice>}
       {!requiresReview && !stale && <section className="card gt-apply" data-gt-apply>
         <div className="eyebrow">SEMANA ACTIVA</div>
         <h2>Aplicar esta rutina</h2>

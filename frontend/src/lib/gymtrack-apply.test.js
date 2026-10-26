@@ -19,7 +19,9 @@ describe('GymTrack Aplicar Plan', () => {
     const before = { queue: current.queue, rotation: current.rotation, scheduleMode: current.scheduleMode }
     const result = applyGymTrackPlan(current, plan)
     expect(result.ok).toBe(true)
+    expect(result.firstRoutineId).toBe('gt-a')
     expect(current.routines.map(routine => routine.id)).toEqual(['old', 'gt-a', 'gt-b'])
+    expect(current.routines.slice(1).every(routine => routine.gymtrack)).toBe(true)
     expect(current.week).toEqual({ 0: ['old'], 1: ['gt-a'], 3: ['gt-b'], 6: ['keep'] })
     expect(current.queue).toBe(before.queue)
     expect(current.rotation).toBe(before.rotation)

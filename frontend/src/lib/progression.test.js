@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   readSession, sessionsFor, stallCount, nextPrescription, applyPrescription, plannedOf, planChanged,
+  gymTrackDoubleReady,
   policyFor, defaultIncrement, weightIncrement, epley1RM, deloadTarget1RM,
   deloadFactorOf, DELOAD_FACTOR, POLICIES_FOR, DELOAD_AFTER, MAX_BW_SETS
 } from './progression.js'
@@ -40,6 +41,12 @@ describe('readSession', () => {
     expect(s.weight).toBe(60)
     expect(s.amrap).toBe(6)
     expect(s.low).toBe(5)
+  })
+
+  it('exposes the highest RPE and leaves it unknown when one work set was not rated', () => {
+    const rated = readSession({ id: LIFT, target: T, sets: [8, 8, 7].map(rpe => ({ w: 60, r: 5, rpe, done: true })) })
+    expect(rated.rpeMax).toBe(8)
+    expect(readSession({ id: LIFT, target: T, sets: [{ w: 60, r: 5, rpe: 8, done: true }, { w: 60, r: 5, done: true }, { w: 60, r: 5, rpe: 8, done: true }] }).rpeMax).toBeNull()
   })
 
   it('counts short reps as a miss even when the set was checked off', () => {
@@ -571,7 +578,7 @@ describe('double progression', () => {
 
 })
 
-describe('timed progression', () => {
+describe('automatic progression', () => {
   const cfg = { id: LIFT, mode: 'time', sets: 2, sec: 45, prog: 'time' }
   const T = { sets: 2, sec: 45, mode: 'time' }
   const timeHist = rows => ({
@@ -757,6 +764,32 @@ describe('an edited plan restarts progression (#275)', () => {
     const twelve = logged(LIFT, { sets: 3, reps: 12, weight: 40 }, { sets: 3, reps: 12, weight: 40 }, 40, [12, 12, 12])
     const p = nextPrescription({ unit: 'kg', workouts: [twelve] }, { id: LIFT, sets: 3, reps: 12, repsMin: 8, weight: 60, prog: 'double' }, R)
     expect(p).toMatchObject({ kind: 'hold', weight: 60, reps: 8 })
+  })
+
+  it('GymTrack holds after one top-range session and increases only after two rated sessions', () => {
+    const session = (d, effort = true) => ({
+      d,
+      routineIds: ['gymtrack'],
+      entries: [{
+        id: LIFT,
+        rid: 'gymtrack',
+        target: { sets: 3, reps: 12, repsMin: 8, weight: 40 },
+        sets: [12, 12, 12].map(r => ({ w: 40, r, done: true, ...(effort ? { rpe: 8 } : {}) })),
+      }],
+    })
+    const cfg = { id: LIFT, sets: 3, reps: 12, repsMin: 8, weight: 40, prog: 'double' }
+    const one = { unit: 'kg', workouts: [session('2026-04-01')] }
+    expect(nextPrescription(one, cfg, { id: 'gymtrack', gymtrack: true })).toMatchObject({ kind: 'hold', weight: 40, reps: 12 })
+    expect(nextPrescription({ ...one, workouts: [...one.workouts, session('2026-04-03')] }, cfg, { id: 'gymtrack', gymtrack: true }))
+      .toMatchObject({ kind: 'up', weight: 42.5, reps: 8 })
+    expect(gymTrackDoubleReady(sessionsFor(one, LIFT, cfg, 'gymtrack'), 12)).toBe(false)
+  })
+
+  it('GymTrack does not increase when the top-range session has no RPE', () => {
+    const workout = { d: '2026-04-01', routineIds: ['gymtrack'], entries: [{ id: LIFT, rid: 'gymtrack', target: { sets: 3, reps: 12, repsMin: 8, weight: 40 }, sets: [12, 12, 12].map(r => ({ w: 40, r, done: true })) }] }
+    const cfg = { id: LIFT, sets: 3, reps: 12, repsMin: 8, weight: 40, prog: 'double' }
+    expect(nextPrescription({ unit: 'kg', workouts: [workout, { ...workout, d: '2026-04-03' }] }, cfg, { id: 'gymtrack', gymtrack: true }))
+      .toMatchObject({ kind: 'hold', weight: 40, reps: 12 })
   })
 
   it('restarts a bodyweight goal from the new reps instead of climbing from the old ones', () => {

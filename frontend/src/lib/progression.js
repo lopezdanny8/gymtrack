@@ -18,7 +18,7 @@
 
 import { modeOf, repStep, rerampWarmups, isBw, isPerSide, entryExcluded, entryRoutineId } from './history.js'
 import { EXIDX, isAssisted, isLoadedEq, defaultIncrement } from './exercises.js'
-import { isWarmupRow, isSideSet, syncSideAggregate, makeSideSet } from './workout-model.js'
+import { isWarmupRow, isSideSet, isFailureSet, syncSideAggregate, makeSideSet } from './workout-model.js'
 import { normalizeRepRange } from './rep-range.js'
 import { isPyramid } from './pyramid.js'
 import { backoffAt } from './backoff.js'
@@ -289,6 +289,13 @@ export function readSession(entry, fallback) {
   // today's set count reads the working weight off the warm-up end of a session nobody planned
   // that way, and the next prescription then starts again from there.
   const sets = entry && entry.target ? logged.slice(0, Math.max(1, planned)) : logged
+  const rpeFor = set => {
+    if (Number.isFinite(Number(set?.rpe))) return Number(set.rpe)
+    if (Number.isFinite(Number(set?.rir))) return 10 - Number(set.rir)
+    return isFailureSet(set) ? 10 : null
+  }
+  const rpeValues = sets.map(rpeFor)
+  const rpeMax = rpeValues.length && rpeValues.every(value => value != null) ? Math.max(...rpeValues) : null
 
   if (mode === 'time') {
     const goal = target.sec || 0
@@ -297,6 +304,7 @@ export function readSession(entry, fallback) {
       mode, target, goal, held,
       weight: loadOf(entry, sets),
       best: Math.max(0, ...held),
+      rpeMax,
       ok: goal > 0 && enough && held.length > 0 && held.every(h => h >= goal)
     }
   }
@@ -315,8 +323,19 @@ export function readSession(entry, fallback) {
     count: reps.length,                                   // the dimension bodyweight work grows (#33)
     low: reps.length ? Math.min(...reps) : 0,
     amrap: reps.length ? reps[reps.length - 1] : 0,       // Greyskull's final set
+    rpeMax,
     ok: goal > 0 && enough && reps.length > 0 && reps.every((r, k) => r >= (rowGoals ? rowGoals[k] ?? goal : goal))
   }
+}
+
+// GymTrack starts conservatively: the first complete session at the top of a range is still a
+// rehearsal. A load increase needs two consecutive complete sessions at the same weight, with
+// every planned work set rated at RPE 8 or below. Missing effort is deliberately not inferred.
+export function gymTrackDoubleReady(sessions, top) {
+  const lastTwo = (sessions || []).slice(-2)
+  if (lastTwo.length !== 2) return false
+  const weight = lastTwo[0].weight
+  return lastTwo.every(session => session.ok && session.low >= top && session.weight === weight && session.rpeMax != null && session.rpeMax <= 8)
 }
 
 /**
@@ -683,7 +702,9 @@ export function nextPrescription(S, cfg, routine) {
     // from before the exercise moved to double progression. Hitting it is compliance with that
     // session, not "reached the top". Double progression must not add weight until every set
     // actually reaches the top of the range (issue #278).
-    if (last.ok && last.low >= top) {
+    const topReached = last.ok && last.low >= top
+    const gymTrackReady = !routine?.gymtrack || gymTrackDoubleReady(sessions, top)
+    if (topReached && gymTrackReady) {
       if (topped(w)) return toppedOut(w, { reps: top })
       const up = harder(w, inc)
       // Over owned bells the step is whatever the next one is: 9 → 11 is 2 kg, 18 → 19 is 1.
@@ -694,6 +715,9 @@ export function nextPrescription(S, cfg, routine) {
           ? ['Top of the rep range in every set. {0} {1} less help, back to {2} reps.', inc, unit, bottom]
           : ['Top of the rep range in every set. {0} {1} more, back to {2} reps.', by, unit, bottom]
       }
+    }
+    if (topReached && routine?.gymtrack) {
+      return { policy, kind: 'hold', weight: w, reps: top, why: ['GymTrack necesita dos sesiones consecutivas en el tope con RPE ≤ 8 antes de subir la carga.'] }
     }
     if (stalls >= deloadAt) {
       const selected = epleyDeload()
