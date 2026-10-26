@@ -35,7 +35,7 @@
 - [x] Si falta una serie válida pero los demás datos están completos y la persona es elegible, mostrar Intermedio provisional sin fabricar puntos ni total sobre 8; al agregar la serie, recalcular.
 - [x] Clasificar 0–4 como Intermedio y 5–8 como Avanzado, y mostrar puntaje, desglose y explicación en el resumen web.
 - [x] Programar la reevaluación cada 8 semanas desde el inicio del plan, con una acción explícita y estado auditable mediante `POST /api/gymtrack/reassessment`; no modifica la semana activa.
-- [ ] Añadir un disparador temprano de reevaluación cuando el progreso registrado lo justifique.
+- [x] Añadir un disparador temprano cuando el historial GymTrack contiene dos sesiones distintas con una subida explícita de carga, separadas por al menos 14 días; la acción sigue siendo confirmar la reevaluación.
 - [x] El servidor selecciona la plantilla exacta por días, nivel y objetivo; si Full Body repetiría músculos antes de 48 horas, 2 días usa Superior/Inferior A y 3 días usa Empuje/Jalón/Piernas. Si equipo/calendario no permiten una rutina utilizable, no persiste una rutina incompleta y devuelve el motivo.
 - [x] Construir el catálogo real para 2–6 días con IDs del catálogo de ejercicios, prescripción por objetivo/nivel y ajuste por equipo; los nombres de las rutinas base de openGym no se usan para inferir nivel u objetivo.
 - [x] Implementar `GET/POST /api/gymtrack/plan`, persistencia privada `gymtrack-plan-{userId}.json`, respuesta idempotente por `assessment.updatedAt` y regeneración explícita con `regenerate: true` si cambió la evaluación.
@@ -58,7 +58,7 @@
 ## Verificación de la vista de rutina
 
 - [x] Pruebas focalizadas: vista GymTrackRoutine 6/6; ruta/CTA/manifiesto Web-only 2/2; endpoints plan/evaluación y OpenAPI 10/10; `vite build`, deep link y manifiesto HTTP correctos.
-- [x] Suite frontend completa de la unidad Aplicar Plan: 450/450 archivos y 5.573/5.573 tests aprobados. Se conservan los avisos de React ya existentes en algunas pruebas, sin fallos.
+- [x] Suite frontend completa de la unidad Aplicar Plan y reevaluación: 451/451 archivos y 5.582/5.582 tests aprobados. Se conservan los avisos de React/Capacitor ya existentes en algunas pruebas, sin fallos.
 
 ## Primera sesión y progresión
 - [x] Conectar desde la rutina GymTrack la primera sesión Web mediante el flujo existente y conservar el origen GymTrack en las rutinas aplicadas. La subida GymTrack exige dos sesiones consecutivas completas en el tope con RPE máximo 8.

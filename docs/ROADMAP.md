@@ -72,6 +72,7 @@ Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados
 
 - Abrir la sesión preparada usando el flujo web existente.
 - [x] Registrar series y RPE para alimentar la prescripción siguiente; falta reevaluación periódica del nivel.
+- [x] Mostrar reevaluación temprana cuando hay dos progresiones GymTrack explícitas separadas por al menos 14 días; la confirmación sigue siendo manual.
 - Implementar la primera versión verificable de doble progresión.
 
 ### Fase 5 — Coach IA contextual y extensiones posteriores

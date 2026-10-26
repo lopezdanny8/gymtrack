@@ -4,6 +4,8 @@ import { api } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { MOBILE } from '../lib/mobile.js'
+import { useStore } from '../store/useStore.js'
+import { progressReassessmentStatus } from '../lib/gymtrack-reassessment.js'
 
 const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const sexLabels = { male: 'Masculino', female: 'Femenino' }
@@ -49,7 +51,9 @@ function Value({ label, value }) {
 
 export default function GymTrackSummary() {
   const navigate = useNavigate()
+  const state = useStore(store => store.S)
   const [assessment, setAssessment] = useState(null)
+  const [plan, setPlan] = useState(null)
   const [reevaluation, setReevaluation] = useState(null)
   const [reevaluating, setReevaluating] = useState(false)
   const [reevaluationMessage, setReevaluationMessage] = useState('')
@@ -62,6 +66,7 @@ export default function GymTrackSummary() {
       .then(([assessmentBody, planBody]) => {
         if (!active) return
         setAssessment(assessmentBody?.assessment || {})
+        setPlan(planBody?.plan || null)
         setReevaluation(planBody?.reevaluation || null)
       })
       .catch(e => { if (active) setError(e?.status === 401 ? 'Inicia sesión para consultar tu evaluación.' : 'No pudimos cargar tu evaluación.') })
@@ -115,6 +120,8 @@ export default function GymTrackSummary() {
     : levelStatus === 'provisional' ? 'Pendiente de serie válida' : 'Pendiente'
   const benchEstimate = assessment?.benchPressEstimate || {}
   const levelCriteria = assessment?.criteria || {}
+  const progressReevaluation = progressReassessmentStatus(state, { plan, reevaluation })
+  const reassessmentDue = reevaluation?.due === true || progressReevaluation.due
   const days = Array.isArray(availability.days) ? availability.days.map(day => dayNames[day]).join(', ') : ''
   const equipment = Array.isArray(availability.equipment) ? availability.equipment.map(item => equipmentLabels[item] || item).join(', ') : ''
   const bestSetLabel = Number.isFinite(bestSet?.weightKg) && Number.isInteger(bestSet?.reps)
@@ -197,9 +204,9 @@ export default function GymTrackSummary() {
           <div className="small muted" style={{ gridColumn: '1 / -1', marginTop: 4 }}>{assessment?.levelExplanation || 'El servidor calculará el nivel cuando estén disponibles los datos necesarios.'}</div>
         </div>
       </section>
-      {reevaluation?.due && <section className="card" role="status" style={{ marginTop: 12 }}>
+      {reassessmentDue && <section className="card" role="status" style={{ marginTop: 12 }}>
         <strong>Tu nivel necesita una reevaluación</strong>
-        <p className="small muted" style={{ margin: '6px 0 10px' }}>Han pasado ocho semanas desde el inicio o la última confirmación del plan. Revisa tus datos y confirma la reevaluación; esto no modifica tu semana activa.</p>
+        <p className="small muted" style={{ margin: '6px 0 10px' }}>{progressReevaluation.due && !reevaluation?.due ? 'Tu progreso registrado justifica revisar el nivel antes del intervalo habitual.' : 'Han pasado ocho semanas desde el inicio o la última confirmación del plan.'} Revisa tus datos y confirma la reevaluación; esto no modifica tu semana activa.</p>
         <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
           <Button variant="plain" onClick={() => navigate('/onboarding/profile')}>Actualizar datos</Button>
           <Button variant="primary" disabled={reevaluating} onClick={confirmReevaluation}>{reevaluating ? 'Confirmando…' : 'Confirmar reevaluación'}</Button>
