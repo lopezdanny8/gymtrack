@@ -28,7 +28,7 @@ Orden aprobado:
 
 1. Perfil físico: fecha de nacimiento, sexo masculino/femenino, talla en cm y peso en kg.
 2. PAR-Q: siete preguntas, guardado progresivo y resumen de seguridad.
-3. Experiencia y objetivo.
+3. Experiencia y objetivo: meses entrenando, forma actual de progresar y objetivo principal.
 4. Disponibilidad, sueño y equipamiento.
 5. Resumen editable antes de continuar.
 
@@ -77,7 +77,7 @@ Semáforo completo, sustituciones seguras, reprogramación, Coach IA, administra
 
 ## Punto actual
 
-La pantalla `/onboarding/profile` está implementada y conectada a `GET/PUT /api/gymtrack/assessment`. El siguiente entregable es `/onboarding/parq`, empezando por las siete preguntas y guardado parcial.
+Las pantallas `/onboarding/profile`, `/onboarding/parq` y `/onboarding/experience` están implementadas y conectadas a `GET/PUT /api/gymtrack/assessment`. El siguiente entregable es disponibilidad, sueño y equipamiento.
 
 ## Fuente de verdad para continuar
 

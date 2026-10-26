@@ -660,6 +660,15 @@ body.chips-dragging *{cursor:inherit}
 .input-with-unit>span{color:var(--label-3);font-size:14px}
 .textbtn{color:var(--label-2);font-size:15px;padding:8px 12px}
 .textbtn:active{color:var(--label)}
+.objective-list{display:flex;flex-direction:column;gap:8px}
+.objective-card{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 15px;text-align:start;background:var(--surface);border-radius:var(--r);transition:background var(--fast),transform var(--fast),box-shadow var(--fast)}
+.objective-card strong,.objective-card small{display:block}
+.objective-card strong{font-size:16px;font-weight:600}
+.objective-card small{color:var(--label-2);font-size:13px;margin-top:3px}
+.objective-card>.icn{color:var(--label-3);font-size:18px}
+.objective-card.selected{background:var(--acc-soft);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.objective-card.selected>.icn{color:var(--acc)}
+.objective-card:active{transform:scale(.99)}
 .measure-options{margin:12px 0 16px}
 .measure-select{margin-bottom:10px;background:var(--surface-2)}
 .measure-preview{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:11px;padding-top:10px;border-top:1px solid var(--sep);font-size:12px;color:var(--label-2)}

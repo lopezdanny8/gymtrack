@@ -82,7 +82,7 @@ export default function GymTrackParq() {
       {error && <div className="card small" role="alert" style={{ color: 'var(--red)' }}>{error}</div>}
       {saved && !error && <div className="small" role="status" style={{ color: 'var(--green)', margin: '4px' }}>Avance guardado.</div>}
 
-      <Button variant="primary" disabled={!complete || !!saving || !user} onClick={() => navigate('/home')} style={{ width: '100%', marginTop: 8 }}>
+      <Button variant="primary" disabled={!complete || !!saving || !user} onClick={() => navigate('/onboarding/experience')} style={{ width: '100%', marginTop: 8 }}>
         {complete ? 'Continuar' : `Responde las ${QUESTIONS.length - answered} restantes`}
       </Button>
       <button className="textbtn" onClick={() => navigate('/home')} style={{ display: 'block', margin: '16px auto' }}>Ahora no</button>

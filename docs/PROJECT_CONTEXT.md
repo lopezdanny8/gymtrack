@@ -25,10 +25,11 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 - Documentación OpenAPI del módulo.
 - Pantalla web `/onboarding/profile` para fecha de nacimiento, sexo, talla y peso.
 - Pantalla web `/onboarding/parq` con las siete preguntas y guardado progresivo.
+- Pantalla web `/onboarding/experience` para meses de experiencia, forma actual de progresar y objetivo.
 
 ## Próximos pasos recomendados
 
-1. Completar las pantallas de experiencia, objetivo, disponibilidad, sueño y equipamiento.
+1. Completar las pantallas de disponibilidad, sueño y equipamiento.
 2. Confirmar las reglas de elegibilidad y asignación de nivel.
 3. Definir el modelo de plan inicial antes de implementar generación automática.
 4. Añadir persistencia de objetivos y plan cuando el flujo esté probado en web.
