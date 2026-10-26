@@ -252,6 +252,16 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
   const refAction = refBest ? t('Show last time instead') : t('Show your best set instead')
   // The button's text is the reference, which says nothing about what a tap does; its name
   // carries both, the reference first as it reads on screen, then the switch.
+  const gymtrackEntry = !!entry.rid && S.routines.some(routine => routine?.id === entry.rid && routine.gymtrack)
+  const workSets = entry.sets.filter(set => !isWarmupRow(set))
+  const exerciseFinished = workSets.length > 0 && workSets.every(set => set.done === true)
+  const exerciseRpe = Number.isFinite(Number(entry.rpe)) ? Number(entry.rpe) : null
+  const openExerciseRpe = () => effortPickerSheet('rpe', exerciseRpe, value => update(s => {
+    const activeEntry = s.active?.entries?.[entryIdx]
+    if (!activeEntry) return
+    if (value == null) delete activeEntry.rpe
+    else activeEntry.rpe = Math.min(10, Math.max(6, Number(value)))
+  }))
   const refLine = refText ? <button type="button" className="refline small dim"
     title={refAction} aria-label={`${refText}. ${refAction}`}
     onClick={() => update(s => { s.logRef = refBest ? 'last' : 'best' })}>
@@ -680,6 +690,12 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
     </div>}
     {entry.note && <div className="exnote">{entry.note}</div>}
     {planLine}
+    {gymtrackEntry && <div className="gt-exercise-rpe" data-gymtrack-rpe>
+      <Button size="xs" variant={exerciseRpe == null ? 'tinted' : 'plain'} disabled={!exerciseFinished} onClick={openExerciseRpe}>
+        {exerciseRpe == null ? 'Registrar RPE del ejercicio' : `RPE del ejercicio: ${exerciseRpe}`}
+      </Button>
+      {!exerciseFinished && <span className="small muted">Completa las series para registrar un RPE único.</span>}
+    </div>}
     {refLine}
     {guidance && onProgressionSettings && <button type="button" className={'progline' + (plan.kind === 'deload' ? ' warn' : '')}
       aria-label={t('Open exercise settings')} onClick={onProgressionSettings}>

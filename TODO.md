@@ -63,9 +63,9 @@
 - [x] Conectar desde la rutina GymTrack la primera sesión Web mediante el flujo existente y conservar el origen GymTrack en las rutinas aplicadas. La subida GymTrack exige dos sesiones consecutivas completas en el tope con RPE máximo 8.
 
 - [ ] El usuario puede abrir la sesión preparada y registrar series válidas reutilizando el flujo actual de openGym.
-- [ ] El RPE se registra una vez por ejercicio al finalizar sus series.
-- [ ] Ejecutar la regla inicial de doble progresión al registrar sesiones: solo aumentar la carga después de dos sesiones consecutivas en el límite superior de repeticiones con RPE ≤ 8.
-- [ ] Si falta el RPE o no se alcanza el límite superior, la carga no aumenta y el sistema puede explicar el motivo.
+- [x] El RPE se registra una vez por ejercicio al finalizar sus series en rutinas GymTrack; el control de esfuerzo por serie existente se conserva.
+- [x] Ejecutar la regla inicial de doble progresión al registrar sesiones: solo aumentar la carga después de dos sesiones consecutivas en el límite superior de repeticiones con RPE ≤ 8.
+- [x] Si falta el RPE o no se alcanza el límite superior, la carga no aumenta y el sistema explica el motivo.
 - [x] Las reglas de dominio tienen pruebas unitarias independientes de React y los endpoints de evaluación tienen pruebas HTTP autenticadas.
 
 ## Pendiente después del primer flujo

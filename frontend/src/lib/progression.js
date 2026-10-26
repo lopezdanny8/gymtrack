@@ -295,7 +295,10 @@ export function readSession(entry, fallback) {
     return isFailureSet(set) ? 10 : null
   }
   const rpeValues = sets.map(rpeFor)
-  const rpeMax = rpeValues.length && rpeValues.every(value => value != null) ? Math.max(...rpeValues) : null
+  const entryRpe = Number.isFinite(Number(entry?.rpe)) ? Number(entry.rpe) : null
+  const rpeMax = entryRpe != null
+    ? entryRpe
+    : rpeValues.length && rpeValues.every(value => value != null) ? Math.max(...rpeValues) : null
 
   if (mode === 'time') {
     const goal = target.sec || 0

@@ -47,6 +47,7 @@ describe('readSession', () => {
     const rated = readSession({ id: LIFT, target: T, sets: [8, 8, 7].map(rpe => ({ w: 60, r: 5, rpe, done: true })) })
     expect(rated.rpeMax).toBe(8)
     expect(readSession({ id: LIFT, target: T, sets: [{ w: 60, r: 5, rpe: 8, done: true }, { w: 60, r: 5, done: true }, { w: 60, r: 5, rpe: 8, done: true }] }).rpeMax).toBeNull()
+    expect(readSession({ id: LIFT, rpe: 7, target: T, sets: [{ w: 60, r: 5, done: true }, { w: 60, r: 5, done: true }, { w: 60, r: 5, done: true }] }).rpeMax).toBe(7)
   })
 
   it('counts short reps as a miss even when the set was checked off', () => {

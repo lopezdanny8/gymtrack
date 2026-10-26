@@ -67,11 +67,11 @@ Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados
 - [x] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9; el plan informa la estimación y los recortes aplicados. Ejecutar doble progresión con datos de sesiones registrados queda para Fase 4.
 
 ### Fase 4 — Primera sesión y progresión
-- [x] Conectar la primera sesión GymTrack al flujo Web existente y exigir dos sesiones consecutivas completas con RPE máximo 8 antes de aumentar carga. El registro de RPE por ejercicio queda como siguiente subunidad.
-- Registrar series y RPE.
+- [x] Conectar la primera sesión GymTrack al flujo Web existente y exigir dos sesiones consecutivas completas con RPE máximo 8 antes de aumentar carga.
+- [x] Registrar series y un RPE único por ejercicio al finalizar sus series; conservar el esfuerzo por serie existente.
 
 - Abrir la sesión preparada usando el flujo web existente.
-- Registrar series y RPE.
+- [x] Registrar series y RPE para alimentar la prescripción siguiente; falta reevaluación periódica del nivel.
 - Implementar la primera versión verificable de doble progresión.
 
 ### Fase 5 — Coach IA contextual y extensiones posteriores

@@ -105,7 +105,9 @@ El generador calcula una estimación conservadora por rutina y, si supera los mi
 ### Unidad completada: primera sesión y gate de progresión GymTrack
 Aplicar un plan marca las rutinas nuevas como GymTrack sin reemplazar rutinas existentes. La vista ofrece iniciar explícitamente la primera sesión con el flujo Web normal (`startFlow`/`beginWorkout`), conservando pesaje, navegación y persistencia. Para estas rutinas, la subida de carga requiere dos sesiones consecutivas completas en el tope del rango y RPE máximo de 8; una sesión sin RPE conserva la carga y explica el bloqueo.
 
-Siguiente subunidad: añadir un campo RPE único por ejercicio al finalizar sus series, además del control de esfuerzo por serie que ya existe en Workout.
+El Workout Web ofrece, al completar las series de una rutina GymTrack, un campo RPE único por ejercicio. Ese valor se conserva en la entrada activa, pasa al workout terminado y tiene prioridad sobre el agregado por serie al juzgar la doble progresión. El control de esfuerzo por serie existente se mantiene.
+
+Siguiente subunidad: reevaluación periódica del nivel y cierre de Fase 4.
 
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 

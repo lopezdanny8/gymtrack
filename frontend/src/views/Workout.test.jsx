@@ -1318,6 +1318,17 @@ describe('effort cell (colour-coded RIR/RPE quick picker)', () => {
     await act(async () => { root.render(React.createElement(Workout)) })
   }
 
+  it('shows one RPE picker for a finished GymTrack exercise and stores it on the entry', async () => {
+    const entry = exercise('plain-bench', [true, true], { rid: 'gymtrack-routine' })
+    await mount([entry], 0, { routines: [{ id: 'gymtrack-routine', gymtrack: { planId: 'plan-1', version: 1 } }] })
+    const control = container.querySelector('[data-gymtrack-rpe] button')
+    expect(control?.textContent).toContain('Registrar RPE del ejercicio')
+    await act(async () => { control.click() })
+    expect(mocks.effortPickerSheet).toHaveBeenCalledWith('rpe', null, expect.any(Function))
+    await act(async () => { mocks.effortPickerSheet.mock.calls.at(-1)[2](8) })
+    expect(mocks.S.active.entries[0].rpe).toBe(8)
+  })
+
   it('shows the effort column only when the profile logs a scale', async () => {
     await mount([exercise('plain-bench', [false])])   // effort: 'none' from workout()
     expect(effCells()).toHaveLength(0)
