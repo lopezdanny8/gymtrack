@@ -6,6 +6,8 @@ import { Button } from '../components/ui.jsx'
 import { MOBILE } from '../lib/mobile.js'
 import { useStore } from '../store/useStore.js'
 import { progressReassessmentStatus } from '../lib/gymtrack-reassessment.js'
+import { fatigueOf } from '../lib/recovery.js'
+import { gymTrackReadiness } from '../lib/gymtrack-readiness.js'
 
 const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const sexLabels = { male: 'Masculino', female: 'Femenino' }
@@ -57,6 +59,12 @@ export default function GymTrackSummary() {
   const [reevaluation, setReevaluation] = useState(null)
   const [reevaluating, setReevaluating] = useState(false)
   const [reevaluationMessage, setReevaluationMessage] = useState('')
+  const [painLevel, setPainLevel] = useState(() => {
+    try {
+      const value = globalThis.localStorage?.getItem('gymtrack_readiness_pain_v1')
+      return value == null ? null : Number(value)
+    } catch { return null }
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -121,6 +129,15 @@ export default function GymTrackSummary() {
   const benchEstimate = assessment?.benchPressEstimate || {}
   const levelCriteria = assessment?.criteria || {}
   const progressReevaluation = progressReassessmentStatus(state, { plan, reevaluation })
+  const fatigue = fatigueOf(state.workouts || [], Date.now())
+  const fatigueMax = Object.values(fatigue).reduce((max, value) => Math.max(max, Number(value) || 0), 0)
+  const readiness = gymTrackReadiness({
+    fatigueMax,
+    sleepHours: Number.isFinite(availability.sleepHours) ? availability.sleepHours : null,
+    painLevel,
+    parqComplete: parq.complete === true,
+    parqPositive: parq.hasPositive === true,
+  })
   const reassessmentDue = reevaluation?.due === true || progressReevaluation.due
   const days = Array.isArray(availability.days) ? availability.days.map(day => dayNames[day]).join(', ') : ''
   const equipment = Array.isArray(availability.equipment) ? availability.equipment.map(item => equipmentLabels[item] || item).join(', ') : ''
@@ -166,6 +183,27 @@ export default function GymTrackSummary() {
       <section className="summary-section">
         <div className="row between summary-heading"><h2>Seguridad</h2><button onClick={() => navigate('/onboarding/parq')}>Editar</button></div>
         <div className="card summary-card"><Value label="PAR-Q" value={parq.complete ? (parq.hasPositive ? 'Completado con respuestas para revisar' : 'Completado sin respuestas positivas') : `Faltan ${parq.missing?.length || 0} respuestas`} /></div>
+      </section>
+
+      <section className="summary-section">
+        <div className="summary-heading"><h2>Semáforo de recuperación</h2></div>
+        <div className="card summary-card" data-gt-readiness>
+          <Value label="Estado" value={readiness.label} />
+          <Value label="Recuperación calculada" value={fatigueMax > 0.5 ? 'Pendiente' : fatigueMax >= 0.25 ? 'En recuperación' : 'Disponible'} />
+          <div style={{ gridColumn: '1 / -1' }}>
+            <div className="small muted" style={{ marginBottom: 8 }}>¿Cómo está el dolor de la zona que piensas entrenar?</div>
+            <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+              {[['Sin dolor', 0], ['Dolor leve o moderado', 4], ['Dolor intenso', 7]].map(([label, value]) => (
+                <button key={value} className={'choice-chip' + (painLevel === value ? ' selected' : '')} aria-pressed={painLevel === value} onClick={() => {
+                  setPainLevel(value)
+                  try { globalThis.localStorage?.setItem('gymtrack_readiness_pain_v1', String(value)) } catch { /* best effort */ }
+                }}>{label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="small muted" style={{ gridColumn: '1 / -1', marginTop: 4 }}>{readiness.reasons.join(' ')}</div>
+          <div className="small muted" style={{ gridColumn: '1 / -1' }}>Es una señal de prudencia, no un diagnóstico ni una autorización médica. No cambia tu rutina automáticamente.</div>
+        </div>
       </section>
 
       <section className="summary-section">

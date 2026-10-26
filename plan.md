@@ -112,6 +112,8 @@ El plan expone una fecha de inicio (`generatedAt`) y el assessment conserva `ree
 
 Las pantallas de onboarding Web mantienen un borrador temporal por pantalla en almacenamiento local del navegador mientras se editan. Un guardado autenticado exitoso lo elimina; un fallo de red conserva los valores para que la persona pueda reintentar sin perder datos.
 
+La primera capa del semáforo Web combina PAR-Q, sueño, dolor reportado y la recuperación calculada existente. PAR-Q incompleto, dolor intenso, menos de seis horas de sueño o fatiga alta producen rojo; señales parciales producen amarillo. Es una recomendación de prudencia, no un diagnóstico, no autoriza entrenamiento y no cambia rutinas automáticamente.
+
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 
 ## Decisiones diferidas

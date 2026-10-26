@@ -45,7 +45,7 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 
 1. **Completado:** `/gymtrack/routine` muestra el preview, ciclo, ajustes por equipo, gate y estado de revisión; creación/regeneración es explícita y la semana activa no se toca.
 2. **Completado:** “Aplicar Plan” con confirmación de colisiones, conservación de rutinas existentes, días no seleccionados y modo de rotación; bloqueo de `review_required`.
-3. **Completado:** borradores locales temporales para onboarding Web. Fase 4 está completada; la siguiente superficie funcional es Fase 5, Coach IA contextual y extensiones posteriores.
+3. **Completado:** primera unidad de Fase 5: semáforo Web conservador basado en recuperación, sueño, dolor reportado y PAR-Q. El siguiente límite funcional es diseñar sustituciones seguras por patrón, sin cambios automáticos todavía.
 4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 
 ## Diagnóstico local actual

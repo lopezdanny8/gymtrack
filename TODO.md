@@ -71,7 +71,7 @@
 
 ## Pendiente después del primer flujo
 
-- [ ] Semáforo completo por recuperación, dolor y PAR-Q.
+- [x] Implementar la primera capa Web del semáforo con recuperación, sueño, dolor reportado y PAR-Q; las sustituciones por patrón quedan separadas.
 - [ ] Sustitución segura por patrón biomecánico.
 - [ ] Ajuste por tiempo y superseries.
 - [ ] Reprogramación protegida, semana reordenada y reingreso por inactividad.

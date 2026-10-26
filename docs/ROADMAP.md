@@ -77,9 +77,8 @@ Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados
 - Implementar la primera versión verificable de doble progresión.
 
 ### Fase 5 — Coach IA contextual y extensiones posteriores
-
 Estado: fuera de la primera entrega.
-
+La primera unidad de esta fase ya entrega un semáforo Web conservador: recuperación calculada, sueño, dolor reportado y estado PAR-Q, sin sustituciones automáticas.
 Coach IA con contexto autorizado, ajuste de sesiones por tiempo disponible, sustituciones seguras, reprogramación, semáforo completo, administración avanzada, autenticación adicional y migración gradual a MySQL.
 
 ## Decisiones confirmadas
