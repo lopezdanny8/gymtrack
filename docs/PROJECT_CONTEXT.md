@@ -50,10 +50,11 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 Leer en este orden:
 
 1. `README.md`
-2. `docs/PROJECT_CONTEXT.md`
-3. `plan.md`
-4. `TODO.md`
-5. `docs/GYMTRACK_OPEN_GYM_MATRIZ.md`
-6. `api/openapi.yaml`
+2. `docs/PRODUCT_VISION.md`
+3. `docs/PROJECT_CONTEXT.md`
+4. `plan.md`
+5. `TODO.md`
+6. `docs/GYMTRACK_OPEN_GYM_MATRIZ.md`
+7. `api/openapi.yaml`
 
 Después revisar el código relacionado con el objetivo antes de modificarlo. Toda decisión que cambie el producto debe quedar registrada en `plan.md`, `TODO.md` o un documento de decisiones.

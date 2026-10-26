@@ -4,6 +4,8 @@
 
 Construir una plataforma web de entrenamiento que convierta los datos del usuario en un perfil, un nivel explicable, un plan inicial y sesiones registrables. Se reutiliza la base técnica existente, pero toda la experiencia visible y la documentación del producto se mantienen bajo la identidad GymTrack.
 
+La visión completa, incluyendo la rutina semanal, el historial de progreso y el Coach IA contextual, está descrita en `docs/PRODUCT_VISION.md`.
+
 ## Alcance actual
 
 El trabajo nuevo se limita a la página web responsive y a su backend Node.js. Android, iOS, Apple Watch y Capacitor se conservan únicamente por compatibilidad y no reciben nuevas funcionalidades en esta etapa.
@@ -60,11 +62,11 @@ Estado: pendiente.
 - Registrar series y RPE.
 - Implementar la primera versión verificable de doble progresión.
 
-### Fase 5 — Extensiones posteriores
+### Fase 5 — Coach IA contextual y extensiones posteriores
 
 Estado: fuera de la primera entrega.
 
-Semáforo completo, sustituciones seguras, reprogramación, Coach IA, administración avanzada, autenticación adicional y migración gradual a MySQL.
+Coach IA con contexto autorizado, ajuste de sesiones por tiempo disponible, sustituciones seguras, reprogramación, semáforo completo, administración avanzada, autenticación adicional y migración gradual a MySQL.
 
 ## Decisiones confirmadas
 
