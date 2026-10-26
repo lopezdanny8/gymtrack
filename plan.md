@@ -96,6 +96,9 @@ Etapa posterior: implementar `MysqlRepository` detrás de la misma interfaz cuan
 - El assessment y el plan se guardan en recursos JSON privados distintos por usuario. La generación no modifica `openGym`; la vista `/gymtrack/routine` permite revisar el plan y solo una acción explícita copia rutinas/días a `S.week`.
 - Al aplicar, las rutinas existentes se conservan, solo se reasignan los días seleccionados por P9 y se confirman colisiones; nunca se cambia automáticamente el modo de rotación. Un plan `review_required` no se puede aplicar.
 
+### Unidad completada: Aplicar Plan en Web
+La acción vive únicamente en `/gymtrack/routine` y no se ejecuta al consultar ni generar el preview. Antes de escribir `S.week`, la interfaz calcula las colisiones de los días P9; si existen, muestra los días afectados y exige una confirmación separada. La aplicación agrega las rutinas del plan que aún no estén en `S.routines`, reemplaza solo los días P9 seleccionados y deja intactos rutinas, días no seleccionados, `queue`, `rotation` y `scheduleMode`. Los planes `review_required` se bloquean tanto en la UI como en la función de dominio.
+
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 
 ## Decisiones diferidas

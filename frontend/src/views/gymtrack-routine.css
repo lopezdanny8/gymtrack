@@ -4,6 +4,13 @@
 .gt-routine .gt-callout[data-tone="danger"]{border-inline-start-color:var(--red)}
 .gt-routine .gt-plan-empty h2,.gt-routine .gt-gate h2{font-size:18px;font-weight:600;margin:3px 0 8px}
 .gt-routine .gt-plan-empty p{line-height:1.45;margin:0 0 16px}
+.gt-routine .gt-apply{line-height:1.45;margin-top:10px}
+.gt-routine .gt-apply h2{font-size:18px;font-weight:600;margin:3px 0 8px}
+.gt-routine .gt-apply p{margin:0 0 12px}
+.gt-routine .gt-apply-confirm{border-top:1px solid var(--sep);padding-top:12px}
+.gt-routine .gt-apply-confirm strong{display:block;margin-bottom:4px}
+.gt-routine .gt-apply-confirm ul{margin:8px 0 12px;padding-inline-start:20px;color:var(--label-2)}
+.gt-routine [data-gt-applied]{border-inline-start-color:var(--green,var(--acc))}
 .gt-routine .gt-gate ul{padding-inline-start:20px;color:var(--label-2);line-height:1.5}
 .gt-routine .gt-plan-actions{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:8px}
 .gt-routine .gt-phase-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}

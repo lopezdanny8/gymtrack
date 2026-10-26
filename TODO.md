@@ -39,9 +39,16 @@
 - [x] Construir el catálogo real para 2–6 días con IDs del catálogo de ejercicios, prescripción por objetivo/nivel y ajuste por equipo; los nombres de las rutinas base de openGym no se usan para inferir nivel u objetivo.
 - [x] Implementar `GET/POST /api/gymtrack/plan`, persistencia privada `gymtrack-plan-{userId}.json`, respuesta idempotente por `assessment.updatedAt` y regeneración explícita con `regenerate: true` si cambió la evaluación.
 - [x] Crear `/gymtrack/routine` solo en Web y enlazarla desde el resumen; muestra semana/split, prescripción, ciclo, adaptaciones, gates y errores de disponibilidad. Crear/regenerar exige una acción explícita; revisar la vista no modifica `S.week`.
-- [ ] Aplicar solo mediante acción explícita a `S.week`, reasignando únicamente días P9 y confirmando conflictos; conservar rutinas existentes y modo de rotación. Rechazar la aplicación de planes `review_required`.
+- [x] Aplicar solo mediante acción explícita a `S.week`, reasignando únicamente días P9 y confirmando conflictos; conservar rutinas existentes y modo de rotación. Rechazar la aplicación de planes `review_required`.
 - [x] El plan considera objetivo, nivel, días concretos, equipo disponible y 48 horas antes de repetir músculos principales; conserva en el plan la duración P9 de cada sesión. Ajustar el volumen para respetar esa duración queda pendiente.
 - [x] El plan describe cuatro semanas: base, progresión, intensificación condicional (+2,5 kg tras dos sesiones en el tope con RPE ≤ 8) y descarga (−40 % de volumen); la descarga no se usa como base de progresión del ciclo siguiente.
+
+## Aplicar Plan Web
+
+- [x] Añadir acción explícita en `/gymtrack/routine`; revisar o generar el preview nunca modifica `S.week`.
+- [x] Confirmar colisiones antes de reemplazar días P9; rutinas existentes y días no seleccionados permanecen intactos.
+- [x] Conservar `queue`, `rotation` y `scheduleMode`; bloquear planes `review_required` y previews obsoletos.
+- [x] Cubrir la lógica con pruebas puras de dominio y mantener el flujo fuera de Android, iOS, Apple Watch y Capacitor.
 
 ## Incidencia web resuelta durante la verificación
 

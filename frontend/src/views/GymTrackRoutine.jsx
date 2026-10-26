@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
+import { useStore } from '../store/useStore.js'
+import { applyGymTrackPlan, getPlanApplicationPreview } from '../lib/gymtrack-apply.js'
 import { exOr } from '../lib/exercises.js'
 import { exerciseNameFor, exerciseNameClass } from '../lib/i18n.js'
 import Icon from '../components/Icon.jsx'
@@ -92,6 +94,8 @@ export default function GymTrackRoutine() {
   const [generating, setGenerating] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [requestError, setRequestError] = useState(null)
+  const [applyConfirmation, setApplyConfirmation] = useState(null)
+  const [applyMessage, setApplyMessage] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
@@ -141,6 +145,28 @@ export default function GymTrackRoutine() {
         setStale(true)
       }
     } finally { setGenerating(false) }
+  }
+
+  const commitApply = () => {
+    let result
+    useStore.getState().update(state => { result = applyGymTrackPlan(state, plan) })
+    if (!result?.ok) {
+      setRequestError({ message: result?.code === 'review-required' ? 'Este borrador requiere revisión profesional y no se puede aplicar.' : 'No pudimos aplicar esta rutina.' })
+      return
+    }
+    setApplyConfirmation(null)
+    setApplyMessage(`Plan aplicado a ${result.days.length} ${result.days.length === 1 ? 'día' : 'días'} de tu semana.`)
+  }
+
+  const apply = () => {
+    if (!plan || stale || plan.status === 'review_required' || plan.reviewRequired === true || plan.activationAllowed === false) return
+    const preview = getPlanApplicationPreview(plan, useStore.getState().S)
+    if (preview.collisions.length) {
+      setApplyConfirmation(preview)
+      setApplyMessage('')
+      return
+    }
+    commitApply()
   }
 
   if (loading) return <div className="narrow gt-routine"><div className="empty">Cargando tu rutina…</div></div>
@@ -230,6 +256,21 @@ export default function GymTrackRoutine() {
       <Notice title={stale ? 'Vista previa desactualizada' : 'Vista previa'}>
         Esta rutina está guardada por separado; consultar o regenerar el plan no modifica tu semana activa.
       </Notice>
+      {applyMessage && <Notice data-gt-applied title="Plan aplicado">{applyMessage} Las rutinas existentes, los días no seleccionados y el modo de rotación se conservaron.</Notice>}
+      {!requiresReview && !stale && <section className="card gt-apply" data-gt-apply>
+        <div className="eyebrow">SEMANA ACTIVA</div>
+        <h2>Aplicar esta rutina</h2>
+        <p>Agrega las rutinas del plan y programa únicamente tus días P9. No cambiaremos el modo de rotación.</p>
+        {applyConfirmation ? <div className="gt-apply-confirm" data-gt-apply-confirm role="alert">
+          <strong>Hay días con rutinas existentes</strong>
+          <p>Al confirmar, esos días se reprogramarán con el plan GymTrack. Las rutinas existentes seguirán guardadas y los demás días no cambiarán.</p>
+          <ul>{applyConfirmation.collisions.map(slot => <li key={slot.day}>{DAY_NAMES[slot.day]}{slot.existingRoutineIds.length > 1 ? ` (${slot.existingRoutineIds.length} rutinas)` : ''}</li>)}</ul>
+          <div className="gt-plan-actions">
+            <Button variant="primary" onClick={commitApply}>Confirmar aplicación</Button>
+            <Button variant="plain" onClick={() => setApplyConfirmation(null)}>Cancelar</Button>
+          </div>
+        </div> : <Button variant="primary" onClick={apply} data-gt-apply-button style={{ width: '100%' }}>Aplicar Plan</Button>}
+      </section>}
       <section className="summary-section">
         <div className="summary-heading"><h2>Tu enfoque</h2></div>
         <div className="card summary-card">

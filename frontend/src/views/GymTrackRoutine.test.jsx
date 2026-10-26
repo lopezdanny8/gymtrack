@@ -81,7 +81,7 @@ describe('GymTrackRoutine', () => {
     expect(host.textContent).toContain('3 series × 8–12 repeticiones')
     expect(host.textContent).toContain('Ajustes por equipamiento')
     expect(host.textContent).toContain('no modifica tu semana activa')
-    expect(button('Aplicar Plan')).toBeUndefined()
+    expect(button('Aplicar Plan')).toBeTruthy()
   })
 
   it('señala PAR-Q positivo como borrador de baja intensidad sin acción para activarlo', async () => {

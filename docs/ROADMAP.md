@@ -55,7 +55,7 @@ Estado: completada. Captura P7, elegibilidad, gate P8 y cálculo/visualización 
 
 ### Fase 3 — Asignación del plan
 
-Estado: generación, persistencia y vista previa implementadas; la siguiente unidad es Aplicar Plan al calendario web, independiente y aún pendiente.
+Estado: generación, persistencia, vista previa y Aplicar Plan Web implementados de forma explícita y segura.
 
 - [x] Crear el catálogo GymTrack con ejercicios reales para 2–6 días y selección server-side por días, nivel y objetivo; ajustar la prescripción por objetivo/nivel y filtrar por el equipo P9.
 - [x] Usar Full Body A/B (2 días), Full Body A/B/C (3), Upper/Lower A/B (4), Superior/Inferior/Empuje/Jalón/Inferior B (5) y PPL×2 (6). Si Full Body viola las 48 h en 2–3 días, elegir Superior/Inferior A o PPL, respectivamente.
@@ -63,7 +63,7 @@ Estado: generación, persistencia y vista previa implementadas; la siguiente uni
 - [x] Implementar `GET/POST /api/gymtrack/plan` con JSON privado separado por usuario, idempotencia por `assessment.updatedAt`, regeneración explícita del plan obsoleto y sin cambios a `openGym` al generar.
 - [x] Describir Base, Progresión, Intensificación condicional (+2,5 kg según doble progresión y P10) y Descarga (−40 % de volumen); la descarga no es base del siguiente ciclo.
 - [x] Crear `/gymtrack/routine` solo para Web, enlazada desde el resumen y sin tabs. Muestra semana, prescripción, ciclo, sustituciones, estado `review_required` y errores de disponibilidad; crear/regenerar el plan es explícito y la vista no modifica `S.week`.
-- [ ] Aplicar solo mediante acción explícita: conservar rutinas existentes, reprogramar únicamente los días P9 y pedir confirmación ante colisiones; no cambiar modo de rotación y bloquear planes `review_required`.
+- [x] Aplicar solo mediante acción explícita; conservar rutinas existentes, reprogramar únicamente los días P9 y pedir confirmación ante colisiones; no cambiar modo de rotación y bloquear planes `review_required`.
 - [ ] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9 y ejecutar doble progresión con datos de sesiones registrados.
 
 ### Fase 4 — Primera sesión y progresión
@@ -93,7 +93,7 @@ Coach IA con contexto autorizado, ajuste de sesiones por tiempo disponible, sust
 
 ## Punto actual
 
-Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience`, `/onboarding/availability` y `/onboarding/summary` están conectadas a `GET/PUT /api/gymtrack/assessment`. El backend devuelve elegibilidad, gate P8 y nivel v1; `GET/POST /api/gymtrack/plan` genera y persiste planes GymTrack v1 en un JSON privado separado. `/gymtrack/routine` ya muestra el preview y sus estados; el siguiente trabajo es la acción segura de Aplicar Plan a la semana activa.
+Las pantallas `/onboarding/profile`, `/onboarding/parq`, `/onboarding/experience`, `/onboarding/availability` y `/onboarding/summary` están conectadas a `GET/PUT /api/gymtrack/assessment`. El backend devuelve elegibilidad, gate P8 y nivel v1; `GET/POST /api/gymtrack/plan` genera y persiste planes GymTrack v1 en un JSON privado separado. `/gymtrack/routine` muestra el preview y sus estados, y permite aplicar explícitamente planes listos con confirmación de colisiones.
 
 ## Fuente de verdad para continuar
 
