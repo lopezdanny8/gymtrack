@@ -3440,7 +3440,7 @@ components:
           type: object
           properties:
             birthDate: { type: string, format: date }
-            biologicalSex: { type: string, enum: [male, female, prefer_not_to_say] }
+            biologicalSex: { type: string, enum: [male, female] }
             heightCm: { type: number, exclusiveMinimum: 0 }
             weightKg: { type: number, exclusiveMinimum: 0 }
         parq:

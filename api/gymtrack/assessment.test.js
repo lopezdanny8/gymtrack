@@ -43,7 +43,13 @@ test('valida el perfil físico requerido', () => {
     birthDate: '1990-02-03',
     heightCm: 180,
     weightKg: 81,
-    biologicalSex: 'prefer_not_to_say',
+    biologicalSex: 'male',
+  }).ok, true);
+  assert.equal(validatePhysicalProfile({
+    birthDate: '1990-02-03',
+    heightCm: 180,
+    weightKg: 81,
+    biologicalSex: 'female',
   }).ok, true);
   const invalid = validatePhysicalProfile({ heightCm: 0, weightKg: -1 });
   assert.equal(invalid.ok, false);

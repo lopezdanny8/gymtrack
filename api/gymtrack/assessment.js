@@ -38,7 +38,7 @@ export function validatePhysicalProfile(profile = {}) {
   }
   if (!isFinitePositive(Number(profile.heightCm))) errors.heightCm = 'height-invalid';
   if (!isFinitePositive(Number(profile.weightKg))) errors.weightKg = 'weight-invalid';
-  if (!['male', 'female', 'prefer_not_to_say'].includes(profile.biologicalSex)) {
+  if (!['male', 'female'].includes(profile.biologicalSex)) {
     errors.biologicalSex = 'biological-sex-required';
   }
   return { ok: Object.keys(errors).length === 0, errors };

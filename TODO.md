@@ -1,4 +1,4 @@
-# Desarrollo inicial de GymTrack sobre openGym
+# Desarrollo inicial de GymTrack Web
 
 ## Alcance y compatibilidad
 
@@ -10,10 +10,11 @@
 
 ## Onboarding y evaluación inicial
 
+- [x] El perfil físico usa altura en centímetros, peso en kilogramos y exactamente dos opciones de sexo: masculino o femenino.
 - [ ] El usuario puede completar progresivamente perfil físico, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento sin perder los datos escritos si falla la conexión.
 - [x] El backend web dispone de `GET/PUT /api/gymtrack/assessment`, valida los campos imposibles de las secciones recibidas y conserva el borrador en un archivo aislado por usuario.
 - [ ] El sistema puede representar el requisito de seis meses de experiencia y dos días semanales, mostrando una salida clara si no se cumple; el bloqueo definitivo queda pendiente de confirmación del grupo.
-- [x] Las respuestas PAR-Q quedan separadas del documento sincronizado de openGym y el backend devuelve su resumen de completitud y estado inicial.
+- [x] Las respuestas PAR-Q quedan separadas del documento sincronizado y el backend devuelve su resumen de completitud y estado inicial.
 
 ## Nivel y asignación del plan
 

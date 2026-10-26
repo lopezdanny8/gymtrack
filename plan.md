@@ -1,4 +1,4 @@
-# Plan inicial de GymTrack sobre openGym
+# Plan inicial de GymTrack Web
 
 ## Alcance aprobado
 
@@ -72,6 +72,9 @@ Etapa posterior: implementar `MysqlRepository` detrás de la misma interfaz cuan
 
 ## Reglas iniciales a implementar
 
+- La altura se registra únicamente en centímetros (`heightCm`).
+- El peso se registra únicamente en kilogramos (`weightKg`).
+- El sexo del perfil se registra con una de dos opciones: masculino (`male`) o femenino (`female`). No se ofrece una tercera opción en el onboarding web.
 - El nivel no lo elige el usuario.
 - El nivel suma hasta 8 puntos con cuatro criterios de 0 a 2 puntos: experiencia, frecuencia, fuerza relativa y forma de progresión.
 - De 0 a 4 puntos: Intermedio; de 5 a 8: Avanzado.
@@ -87,7 +90,7 @@ Etapa posterior: implementar `MysqlRepository` detrás de la misma interfaz cuan
 - Semáforo completo y sustitución segura.
 - Regla definitiva de sueño frente a la reducción del semáforo.
 - Modelo relacional y migración a MySQL.
-- Diseño visual final de GymTrack frente al estilo actual de openGym.
+- Ajustes visuales posteriores del sistema GymTrack.
 
 ## Dirección visual
 

@@ -57,7 +57,7 @@ test('la evaluación web se guarda separada y se recupera autenticada', async t 
     method: 'PUT',
     headers,
     body: JSON.stringify({
-      profile: { birthDate: '1990-02-03', biologicalSex: 'prefer_not_to_say', heightCm: 180, weightKg: 81 },
+      profile: { birthDate: '1990-02-03', biologicalSex: 'male', heightCm: 180, weightKg: 81 },
       parq: parqNo,
       experience: { months: 18, progressionMode: 'tracks_loads' },
       objective: 'hypertrophy',
