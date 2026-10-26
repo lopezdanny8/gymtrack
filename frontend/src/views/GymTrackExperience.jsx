@@ -59,7 +59,7 @@ export default function GymTrackExperience() {
         })
       })
       setSaved(true)
-      window.setTimeout(() => navigate('/home'), 250)
+      window.setTimeout(() => navigate('/onboarding/availability'), 250)
     } catch (e) {
       setError(e?.status === 401 ? 'Inicia sesión para guardar tu evaluación.' : 'No pudimos guardar tus datos. Inténtalo de nuevo.')
     } finally { setSaving(false) }
