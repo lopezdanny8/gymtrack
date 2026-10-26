@@ -110,6 +110,8 @@ El Workout Web ofrece, al completar las series de una rutina GymTrack, un campo 
 ### Unidad completada: reevaluación periódica base
 El plan expone una fecha de inicio (`generatedAt`) y el assessment conserva `reevaluation.lastAt`. A las ocho semanas se muestra un aviso Web; además, el historial Web puede adelantar el aviso cuando encuentra dos sesiones GymTrack con `plan.kind: "up"` separadas por al menos 14 días. `POST /api/gymtrack/reassessment` marca la reevaluación con una acción explícita y no modifica la semana activa.
 
+Las pantallas de onboarding Web mantienen un borrador temporal por pantalla en almacenamiento local del navegador mientras se editan. Un guardado autenticado exitoso lo elimina; un fallo de red conserva los valores para que la persona pueda reintentar sin perder datos.
+
 Las reglas generales proceden de `GymTrack—Guíacompletadefuncionalidaddelosmockups(v7).pdf`. Las decisiones que no estaban detalladas allí —puntos, fórmula, bandas y estructuras— se fijaron como reglas v1 en `docs/GYMTRACK_LEVEL_PLAN_PROPOSAL.md`; son heurísticas de producto sujetas a validación con uso real, no reglas clínicas.
 
 ## Decisiones diferidas

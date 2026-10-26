@@ -4,6 +4,7 @@ import { api } from '../lib/api.js'
 import { useStore } from '../store/useStore.js'
 import Icon from '../components/Icon.jsx'
 import { Button, NumberField, Segmented, TextField } from '../components/ui.jsx'
+import { clearGymTrackDraft, readGymTrackDraft, writeGymTrackDraft } from '../lib/gymtrack-onboarding-draft.js'
 
 const emptyProfile = { birthDate: '', biologicalSex: 'male', heightCm: '', weightKg: '' }
 
@@ -25,7 +26,7 @@ function errorFor(profile) {
 export default function GymTrackProfile() {
   const navigate = useNavigate()
   const user = useStore(s => s.user)
-  const [profile, setProfile] = useState(emptyProfile)
+  const [profile, setProfile] = useState(() => readGymTrackDraft('profile', emptyProfile))
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -45,6 +46,7 @@ export default function GymTrackProfile() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+  useEffect(() => { if (!loading) writeGymTrackDraft('profile', profile) }, [loading, profile])
 
   const bmi = useMemo(() => bmiOf(profile.heightCm, profile.weightKg), [profile.heightCm, profile.weightKg])
   const set = (key, value) => { setProfile(current => ({ ...current, [key]: value })); setError(''); setMessage('') }
@@ -63,6 +65,7 @@ export default function GymTrackProfile() {
           weightKg: Number(profile.weightKg),
         } })
       })
+      clearGymTrackDraft('profile')
       setMessage('Datos guardados.')
       window.setTimeout(() => navigate('/onboarding/parq'), 250)
     } catch (e) {

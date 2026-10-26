@@ -4,6 +4,7 @@ import { api } from '../lib/api.js'
 import { useStore } from '../store/useStore.js'
 import Icon from '../components/Icon.jsx'
 import { Button, NumberField, Segmented } from '../components/ui.jsx'
+import { clearGymTrackDraft, readGymTrackDraft, writeGymTrackDraft } from '../lib/gymtrack-onboarding-draft.js'
 
 const OBJECTIVES = [
   ['hypertrophy', 'Ganar músculo', 'Aumentar masa muscular y volumen.'],
@@ -23,12 +24,12 @@ const hasValue = value => value !== '' && value !== null && value !== undefined
 export default function GymTrackExperience() {
   const navigate = useNavigate()
   const user = useStore(s => s.user)
-  const [months, setMonths] = useState('')
-  const [trainingDaysPerWeek, setTrainingDaysPerWeek] = useState('')
-  const [benchWeightKg, setBenchWeightKg] = useState('')
-  const [benchReps, setBenchReps] = useState('')
-  const [progressionMode, setProgressionMode] = useState('')
-  const [objective, setObjective] = useState('')
+  const [months, setMonths] = useState(() => readGymTrackDraft('experience', {}).months ?? '')
+  const [trainingDaysPerWeek, setTrainingDaysPerWeek] = useState(() => readGymTrackDraft('experience', {}).trainingDaysPerWeek ?? '')
+  const [benchWeightKg, setBenchWeightKg] = useState(() => readGymTrackDraft('experience', {}).benchWeightKg ?? '')
+  const [benchReps, setBenchReps] = useState(() => readGymTrackDraft('experience', {}).benchReps ?? '')
+  const [progressionMode, setProgressionMode] = useState(() => readGymTrackDraft('experience', {}).progressionMode ?? '')
+  const [objective, setObjective] = useState(() => readGymTrackDraft('experience', {}).objective ?? '')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -52,6 +53,9 @@ export default function GymTrackExperience() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+  useEffect(() => {
+    if (!loading) writeGymTrackDraft('experience', { months, trainingDaysPerWeek, benchWeightKg, benchReps, progressionMode, objective })
+  }, [loading, months, trainingDaysPerWeek, benchWeightKg, benchReps, progressionMode, objective])
 
   const save = async () => {
     const monthCount = hasValue(months) ? Number(months) : NaN
@@ -98,6 +102,7 @@ export default function GymTrackExperience() {
           objective,
         })
       })
+      clearGymTrackDraft('experience')
       setSaved(true)
       window.setTimeout(() => navigate('/onboarding/availability'), 250)
     } catch (e) {

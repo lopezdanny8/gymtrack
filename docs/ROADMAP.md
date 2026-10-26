@@ -35,6 +35,7 @@ Orden aprobado:
 5. Resumen editable antes de continuar.
 
 Cada pantalla debe poder cargar el borrador, validar sus propios campos y guardar sin borrar las secciones anteriores.
+Cada pantalla conserva un borrador temporal local por pantalla para que un fallo de conexión no borre lo que la persona ya escribió; se elimina después de un guardado exitoso.
 
 P7 de la guía funcional pide meses entrenando, días que la persona entrena actualmente, mejor serie reciente de press de banca (kg × repeticiones), forma de progresar y objetivo. El paso web captura estos insumos, P9 conserva por separado los días disponibles, el backend deriva elegibilidad y calcula el nivel v1, y el resumen muestra su desglose. El backend genera y persiste la rutina; la vista previa Web y Aplicar Plan con confirmación ya están implementados.
 

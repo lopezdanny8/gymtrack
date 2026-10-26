@@ -4,6 +4,7 @@ import { api } from '../lib/api.js'
 import { useStore } from '../store/useStore.js'
 import Icon from '../components/Icon.jsx'
 import { Button, Segmented } from '../components/ui.jsx'
+import { clearGymTrackDraft, readGymTrackDraft, writeGymTrackDraft } from '../lib/gymtrack-onboarding-draft.js'
 
 const QUESTIONS = [
   ['heart_condition', '¿Alguna vez un médico te ha dicho que tienes una afección cardíaca o que solo debes hacer actividad física recomendada por un médico?'],
@@ -18,7 +19,7 @@ const QUESTIONS = [
 export default function GymTrackParq() {
   const navigate = useNavigate()
   const user = useStore(s => s.user)
-  const [answers, setAnswers] = useState({})
+  const [answers, setAnswers] = useState(() => readGymTrackDraft('parq', {}))
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(null)
   const [error, setError] = useState('')
@@ -32,6 +33,7 @@ export default function GymTrackParq() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+  useEffect(() => { if (!loading) writeGymTrackDraft('parq', answers) }, [loading, answers])
 
   const answered = QUESTIONS.filter(([id]) => typeof answers[id] === 'boolean').length
   const complete = answered === QUESTIONS.length
@@ -40,8 +42,10 @@ export default function GymTrackParq() {
   const answer = async (id, value) => {
     const next = { ...answers, [id]: value }
     setAnswers(next); setError(''); setSaved(false); setSaving(id)
+    writeGymTrackDraft('parq', next)
     try {
       await api('/api/gymtrack/assessment', { method: 'PUT', body: JSON.stringify({ parq: next }) })
+      clearGymTrackDraft('parq')
       setSaved(true)
     } catch (e) {
       setError(e?.status === 401 ? 'Inicia sesión para guardar tu evaluación.' : 'No pudimos guardar esta respuesta. Inténtalo de nuevo.')

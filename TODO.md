@@ -16,7 +16,7 @@
 - [x] La pantalla web `/onboarding/experience` guarda meses de experiencia, modo actual de progresión y objetivo principal.
 - [x] La pantalla web `/onboarding/availability` guarda días, duración, hora, sueño y equipamiento disponible.
 - [x] La pantalla web `/onboarding/summary` muestra todas las secciones y permite editarlas antes de confirmar.
-- [ ] El usuario puede completar progresivamente perfil físico, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento sin perder los datos escritos si falla la conexión.
+- [x] Conservar temporalmente en Web los datos escritos de perfil, PAR-Q, experiencia, objetivo, disponibilidad, sueño y equipamiento si falla la conexión; limpiar el borrador local tras guardar correctamente.
 - [x] El backend web dispone de `GET/PUT /api/gymtrack/assessment`, valida los campos imposibles de las secciones recibidas y conserva el borrador en un archivo aislado por usuario.
 - [x] El bloque web P7 captura meses entrenando, días que la persona entrena actualmente (separados de los días disponibles de P9), serie reciente de press de banca (kg × repeticiones, si se dispone), forma de progresar (sin registro, registra cargas, plan con RPE) y objetivo v7 (fuerza, hipertrofia, recomposición o rendimiento); lo guarda en el borrador autenticado.
 - [x] El backend deriva estados de elegibilidad pendiente/apto/no apto con los meses entrenando y la frecuencia real P7; nunca usa `availability.daysPerWeek` de P9 para este cálculo.
@@ -58,7 +58,7 @@
 ## Verificación de la vista de rutina
 
 - [x] Pruebas focalizadas: vista GymTrackRoutine 6/6; ruta/CTA/manifiesto Web-only 2/2; endpoints plan/evaluación y OpenAPI 10/10; `vite build`, deep link y manifiesto HTTP correctos.
-- [x] Suite frontend completa de la unidad Aplicar Plan y reevaluación: 451/451 archivos y 5.582/5.582 tests aprobados. Se conservan los avisos de React/Capacitor ya existentes en algunas pruebas, sin fallos.
+- [x] Suite frontend completa de Aplicar Plan, reevaluación y borradores de onboarding: 452/452 archivos y 5.585/5.585 tests aprobados. Se conservan los avisos de React/Capacitor ya existentes en algunas pruebas, sin fallos.
 
 ## Primera sesión y progresión
 - [x] Conectar desde la rutina GymTrack la primera sesión Web mediante el flujo existente y conservar el origen GymTrack en las rutinas aplicadas. La subida GymTrack exige dos sesiones consecutivas completas en el tope con RPE máximo 8.

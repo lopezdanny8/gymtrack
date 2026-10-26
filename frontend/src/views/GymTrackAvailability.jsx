@@ -4,6 +4,7 @@ import { api } from '../lib/api.js'
 import { useStore } from '../store/useStore.js'
 import Icon from '../components/Icon.jsx'
 import { Button, NumberField, Segmented, TextField } from '../components/ui.jsx'
+import { clearGymTrackDraft, readGymTrackDraft, writeGymTrackDraft } from '../lib/gymtrack-onboarding-draft.js'
 
 const DAYS = [['lunes', 1], ['martes', 2], ['miércoles', 3], ['jueves', 4], ['viernes', 5], ['sábado', 6], ['domingo', 0]]
 const EQUIPMENT = [
@@ -15,12 +16,12 @@ const FREQUENCIES = [2, 3, 4, 5, 6].map(value => ({ value, label: `${value} día
 export default function GymTrackAvailability() {
   const navigate = useNavigate()
   const user = useStore(s => s.user)
-  const [daysPerWeek, setDaysPerWeek] = useState(3)
-  const [days, setDays] = useState([1, 3, 5])
-  const [startTime, setStartTime] = useState('18:00')
-  const [minutes, setMinutes] = useState(60)
-  const [sleepHours, setSleepHours] = useState(7)
-  const [equipment, setEquipment] = useState(['bodyweight', 'dumbbell'])
+  const [daysPerWeek, setDaysPerWeek] = useState(() => readGymTrackDraft('availability', {}).daysPerWeek ?? 3)
+  const [days, setDays] = useState(() => readGymTrackDraft('availability', {}).days ?? [1, 3, 5])
+  const [startTime, setStartTime] = useState(() => readGymTrackDraft('availability', {}).startTime ?? '18:00')
+  const [minutes, setMinutes] = useState(() => readGymTrackDraft('availability', {}).minutes ?? 60)
+  const [sleepHours, setSleepHours] = useState(() => readGymTrackDraft('availability', {}).sleepHours ?? 7)
+  const [equipment, setEquipment] = useState(() => readGymTrackDraft('availability', {}).equipment ?? ['bodyweight', 'dumbbell'])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -42,6 +43,9 @@ export default function GymTrackAvailability() {
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
+  useEffect(() => {
+    if (!loading) writeGymTrackDraft('availability', { daysPerWeek, days, startTime, minutes, sleepHours, equipment })
+  }, [loading, daysPerWeek, days, startTime, minutes, sleepHours, equipment])
 
   const toggleDay = day => {
     setDays(current => {
@@ -62,6 +66,7 @@ export default function GymTrackAvailability() {
         method: 'PUT',
         body: JSON.stringify({ availability: { daysPerWeek, days, startTime, minutes: Number(minutes), sleepHours: Number(sleepHours), equipment } })
       })
+      clearGymTrackDraft('availability')
       window.setTimeout(() => navigate('/onboarding/summary'), 250)
     } catch (e) {
       setError(e?.status === 401 ? 'Inicia sesión para guardar tu evaluación.' : 'No pudimos guardar tus datos. Inténtalo de nuevo.')
