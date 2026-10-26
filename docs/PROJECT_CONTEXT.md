@@ -40,8 +40,8 @@ Los avisos legales y las atribuciones requeridas se encuentran separados en `NOT
 
 ## Próximos pasos recomendados
 
-1. Crear la vista web `/gymtrack/routine` para mostrar la semana, fases, prescripción y adaptaciones; presentar errores de disponibilidad y el estado `review_required` con advertencia.
-2. Añadir “Aplicar Plan” con confirmación de colisiones, conservando rutinas existentes, días no seleccionados y modo de rotación; bloquear aplicación de `review_required`.
+1. **En curso:** crear la vista web `/gymtrack/routine` para mostrar semana, fases, prescripción y adaptaciones; presentar errores de disponibilidad y el estado `review_required` con advertencia. Esta unidad es de lectura/vista previa: no modificar `S.week`.
+2. **Siguiente unidad, pendiente:** añadir “Aplicar Plan” con confirmación de colisiones, conservando rutinas existentes, días no seleccionados y modo de rotación; bloquear aplicación de `review_required`.
 3. Ajustar volumen según minutos disponibles y conectar sesión, registro RPE/doble progresión y reevaluación de nivel cada 8 semanas.
 4. Evaluar MySQL cuando las entidades, relaciones y migraciones estén estabilizadas.
 

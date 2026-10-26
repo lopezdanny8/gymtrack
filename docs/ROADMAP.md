@@ -55,14 +55,14 @@ Estado: completada. Captura P7, elegibilidad, gate P8 y cálculo/visualización 
 
 ### Fase 3 — Asignación del plan
 
-Estado: backend implementado; falta presentar el plan en `/gymtrack/routine` y agregarlo al calendario web mediante acción explícita.
+Estado: backend implementado; la tarea actual es presentar el plan en `/gymtrack/routine`. Aplicar Plan al calendario web queda como una unidad posterior e independiente.
 
 - [x] Crear el catálogo GymTrack con ejercicios reales para 2–6 días y selección server-side por días, nivel y objetivo; ajustar la prescripción por objetivo/nivel y filtrar por el equipo P9.
 - [x] Usar Full Body A/B (2 días), Full Body A/B/C (3), Upper/Lower A/B (4), Superior/Inferior/Empuje/Jalón/Inferior B (5) y PPL×2 (6). Si Full Body viola las 48 h en 2–3 días, elegir Superior/Inferior A o PPL, respectivamente.
 - [x] Comprobar ejercicios válidos, sustituciones explicables y recuperación de al menos 48 h entre músculos principales; no persistir un plan incompleto si el equipo o el calendario no sirven.
 - [x] Implementar `GET/POST /api/gymtrack/plan` con JSON privado separado por usuario, idempotencia por `assessment.updatedAt`, regeneración explícita del plan obsoleto y sin cambios a `openGym` al generar.
 - [x] Describir Base, Progresión, Intensificación condicional (+2,5 kg según doble progresión y P10) y Descarga (−40 % de volumen); la descarga no es base del siguiente ciclo.
-- [ ] Crear `/gymtrack/routine` para mostrar la semana, prescripción, ciclo, sustituciones, estado `review_required` y errores que requieran corregir disponibilidad.
+- [ ] **En curso — solo vista previa.** Crear `/gymtrack/routine` para mostrar la semana, prescripción, ciclo, sustituciones, estado `review_required` y errores que requieran corregir disponibilidad; enlazarla desde el resumen. No modificar `S.week` en esta unidad.
 - [ ] Aplicar solo mediante acción explícita: conservar rutinas existentes, reprogramar únicamente los días P9 y pedir confirmación ante colisiones; no cambiar modo de rotación y bloquear planes `review_required`.
 - [ ] Ajustar volumen/cantidad de ejercicios para respetar la duración de sesión P9 y ejecutar doble progresión con datos de sesiones registrados.
 
